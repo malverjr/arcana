@@ -24,17 +24,17 @@ export default function Home() {
       justifyContent: "center",
       alignItems: "center",
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #fa709a, #fee140)",
+      background: "linear-gradient(135deg, #000428, #004e92)", // Degradado de azules
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       padding: "0 1rem"
     }}>
       <h1 style={{
-          color: "#333",
+          color: "#fff",
           fontSize: "3rem",
           textShadow: "1px 1px 4px rgba(0,0,0,0.3)"
         }}>Tarot Místico IA</h1>
       <p style={{
-          color: "#555",
+          color: "#ddd",
           fontSize: "1.25rem",
           marginBottom: "2rem"
         }}>
