@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import Head from 'next/head';
 
 export default function Home() {
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
+  const [gifSrc, setGifSrc] = useState("/1744681156832.gif"); // Asegúrate de que el GIF se llama wizard.gif y esté en public/
 
   async function getReading() {
     setLoading(true);
@@ -11,6 +13,11 @@ export default function Home() {
       const res = await fetch('/api/tarot');
       const data = await res.json();
       setReading(data.reading);
+
+      // Reiniciar el GIF forzando una recarga desde el inicio:
+      // Se genera un valor único, por ejemplo, usando Date.now()
+      const randomParam = Date.now();
+      setGifSrc(`/wizard.gif?_t=${randomParam}`);
     } catch (error) {
       setReading("Error al obtener la tirada. Inténtalo de nuevo.");
     }
@@ -24,22 +31,29 @@ export default function Home() {
       justifyContent: "center",
       alignItems: "center",
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #000428, #004e92)", // Degradado de azules
+      background: "linear-gradient(135deg, #000428, #004e92)",
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       padding: "0 1rem"
     }}>
+      <Head>
+        <title>Tarot Místico IA</title>
+      </Head>
+
       <h1 style={{
           color: "#fff",
           fontSize: "3rem",
           textShadow: "1px 1px 4px rgba(0,0,0,0.3)"
-        }}>Tarot Místico IA</h1>
-      <p style={{
-          color: "#ddd",
-          fontSize: "1.25rem",
-          marginBottom: "2rem"
         }}>
-        Obtén tu lectura mística personalizada
-      </p>
+        Tarot Místico IA
+      </h1>
+
+      {/* Mostrar el GIF con src dinámico */}
+      <img
+        src={gifSrc}
+        alt="Mago animado"
+        style={{ width: "200px", height: "200px", marginBottom: "2rem" }}
+      />
+
       <button 
         onClick={getReading} 
         style={{
@@ -50,7 +64,7 @@ export default function Home() {
           cursor: "pointer",
           backgroundColor: "#fff",
           color: "#333",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
           transition: "transform 0.2s"
         }}
         onMouseOver={(e)=>e.currentTarget.style.transform="scale(1.05)"}
@@ -58,6 +72,7 @@ export default function Home() {
       >
         {loading ? "Leyendo..." : "Haz tu tirada"}
       </button>
+
       {reading && (
         <div style={{
           marginTop: "2rem",
@@ -72,5 +87,5 @@ export default function Home() {
         </div>
       )}
     </div>
-  )
+  );
 }
