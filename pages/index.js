@@ -4,7 +4,7 @@ import Head from 'next/head';
 export default function Home() {
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
-  const [gifSrc, setGifSrc] = useState("/1744681156832.gif"); // Asegúrate de que el GIF se llama wizard.gif y esté en public/
+  const [gifSrc, setGifSrc] = useState("/Animation - 1744681156832.gif"); // Asegúrate de que el GIF se llama wizard.gif y esté en public/
 
   async function getReading() {
     setLoading(true);
