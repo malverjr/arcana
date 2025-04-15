@@ -17,7 +17,7 @@ export default function Home() {
       // Reiniciar el GIF forzando una recarga desde el inicio:
       // Se genera un valor único, por ejemplo, usando Date.now()
       const randomParam = Date.now();
-      setGifSrc(`/wizard.gif?_t=${randomParam}`);
+      setGifSrc(`/Animation - 1744681156832.gif?_t=${randomParam}`);
     } catch (error) {
       setReading("Error al obtener la tirada. Inténtalo de nuevo.");
     }
