@@ -1,7 +1,8 @@
-// Variable global para almacenar la última lectura generada
+// Variable global para almacenar la última lectura
 let lastReading = "";
 
 export default function handler(req, res) {
+  // Array con 50 lecturas místicas
   const readings = [
     "El camino se abre ante ti. Nuevas oportunidades te esperan.",
     "Confía en tu intuición; hoy es un día de revelaciones.",
@@ -56,13 +57,15 @@ export default function handler(req, res) {
   ];
 
   let randomIndex, selectedReading;
-  
-  // Genera una lectura que sea diferente a la anterior
+
+  // Bucle para asegurarnos de que la lectura no se repita consecutivamente
   do {
     randomIndex = Math.floor(Math.random() * readings.length);
     selectedReading = readings[randomIndex];
   } while (selectedReading === lastReading && readings.length > 1);
 
+  // Guardamos la lectura actual para la próxima llamada
   lastReading = selectedReading;
-  
+
   res.status(200).json({ reading: selectedReading });
+}
