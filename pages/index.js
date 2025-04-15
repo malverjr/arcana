@@ -4,7 +4,10 @@ import Head from 'next/head';
 export default function Home() {
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
-  const [gifSrc, setGifSrc] = useState("/Animation - 1744681156832.gif"); // Asegúrate de que el GIF se llama wizard.gif y esté en public/
+
+  // Ruta de tu GIF con fondo negro (asegúrate de subirlo a /public)
+  // Por ejemplo: /Art Glow GIF by xponentialdesign.gif
+  const [gifSrc, setGifSrc] = useState("/Art Glow GIF by xponentialdesign.gif");
 
   async function getReading() {
     setLoading(true);
@@ -13,11 +16,6 @@ export default function Home() {
       const res = await fetch('/api/tarot');
       const data = await res.json();
       setReading(data.reading);
-
-      // Reiniciar el GIF forzando una recarga desde el inicio:
-      // Se genera un valor único, por ejemplo, usando Date.now()
-      const randomParam = Date.now();
-      setGifSrc(`/Animation - 1744681156832.gif?_t=${randomParam}`);
     } catch (error) {
       setReading("Error al obtener la tirada. Inténtalo de nuevo.");
     }
@@ -31,8 +29,11 @@ export default function Home() {
       justifyContent: "center",
       alignItems: "center",
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #000428, #004e92)",
+      // Fondo completamente negro
+      background: "black",
+      // Cambiamos la fuente y el color de textos
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      color: "white",
       padding: "0 1rem"
     }}>
       <Head>
@@ -40,18 +41,22 @@ export default function Home() {
       </Head>
 
       <h1 style={{
-          color: "#fff",
-          fontSize: "3rem",
-          textShadow: "1px 1px 4px rgba(0,0,0,0.3)"
-        }}>
+        fontSize: "3rem",
+        textShadow: "1px 1px 4px rgba(255,255,255,0.3)"
+      }}>
         Tarot Místico IA
       </h1>
-
-      {/* Mostrar el GIF con src dinámico */}
+      
+      {/* GIF central con fondo negro */}
       <img
         src={gifSrc}
-        alt="Mago animado"
-        style={{ width: "200px", height: "200px", marginBottom: "2rem" }}
+        alt="Animación Mística"
+        style={{
+          width: "300px",
+          height: "300px",
+          marginBottom: "2rem",
+          objectFit: "cover"
+        }}
       />
 
       <button 
@@ -64,7 +69,7 @@ export default function Home() {
           cursor: "pointer",
           backgroundColor: "#fff",
           color: "#333",
-          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+          boxShadow: "0 4px 8px rgba(255, 255, 255, 0.2)",
           transition: "transform 0.2s"
         }}
         onMouseOver={(e)=>e.currentTarget.style.transform="scale(1.05)"}
@@ -77,11 +82,11 @@ export default function Home() {
         <div style={{
           marginTop: "2rem",
           fontSize: "1.5rem",
-          color: "#333",
-          background: "rgba(255, 255, 255, 0.8)",
+          color: "#fff",
+          background: "rgba(255, 255, 255, 0.1)",
           padding: "1rem 2rem",
           borderRadius: "8px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+          boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
         }}>
           {reading}
         </div>
