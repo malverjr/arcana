@@ -37,14 +37,14 @@ export default function Home() {
       padding: "0 1rem"
     }}>
       <Head>
-        <title>Tarot Místico IA</title>
+        <title>Arcana</title>
       </Head>
 
       <h1 style={{
         fontSize: "3rem",
         textShadow: "1px 1px 4px rgba(255,255,255,0.3)"
       }}>
-        Tarot Místico IA
+        Arcana
       </h1>
       
       {/* GIF central con fondo negro */}
