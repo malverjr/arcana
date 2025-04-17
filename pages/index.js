@@ -67,4 +67,76 @@ export default function Home() {
       resetDraws();
     } else {
       const lastReset = new Date(lastResetRaw);
-      if (
+      if (now >= next) {
+        resetDraws();
+      } else {
+        const storedDraws = Number(localStorage.getItem("drawsLeft") || 0);
+        setDrawsLeft(storedDraws);
+      }
+    }
+  }, []);
+
+  async function getReading() {
+    if (drawsLeft <= 0) return;
+
+    setLoading(true);
+    setReading("");
+    try {
+      const res = await fetch('/api/tarot');
+      const data = await res.json();
+      setReading(data.reading);
+      setDrawsLeft(prev => {
+        const updated = prev - 1;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("drawsLeft", updated);
+        }
+        return updated;
+      });
+    } catch (error) {
+      setReading("Error al obtener la tirada. Inténtalo de nuevo.");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "100vh",
+      background: "black",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      color: "white",
+      padding: "0 1rem"
+    }}>
+      <Head>
+        <title>Arcana</title>
+      </Head>
+      <h1 style={{ fontSize: "3rem", textShadow: "1px 1px 4px rgba(255,255,255,0.3)" }}>Arcana</h1>
+      <img src={gifSrc} alt="Animación Mística" style={{ width: "300px", height: "300px", marginBottom: "2rem", objectFit: "cover" }} />
+      <p>{isPremium ? "Usuario Premium" : "Usuario Normal"} – Tiradas restantes: {drawsLeft}</p>
+      <p style={{ marginBottom: "1rem" }}>Próxima tirada disponible en: {timeLeft}</p>
+      <button onClick={getReading} disabled={drawsLeft <= 0} style={{
+        padding: "1rem 2rem", fontSize: "1.25rem", border: "none", borderRadius: "8px",
+        cursor: drawsLeft > 0 ? "pointer" : "not-allowed", backgroundColor: "#fff",
+        color: "#333", boxShadow: "0 4px 8px rgba(255, 255, 255, 0.2)",
+        transition: "transform 0.2s", opacity: drawsLeft > 0 ? 1 : 0.5
+      }}
+        onMouseOver={(e)=>e.currentTarget.style.transform="scale(1.05)"}
+        onMouseOut={(e)=>e.currentTarget.style.transform="scale(1)"}
+      >
+        {loading ? "Leyendo..." : "Haz tu tirada"}
+      </button>
+      {reading && (
+        <div style={{
+          marginTop: "2rem", fontSize: "1.5rem", color: "#fff",
+          background: "rgba(255, 255, 255, 0.1)", padding: "1rem 2rem",
+          borderRadius: "8px", boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
+        }}>
+          {reading}
+        </div>
+      )}
+    </div>
+  );
+}
