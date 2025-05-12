@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
-// Calcula número de semana ISO
+// Calcula el número de semana ISO del año
 function getWeekNumber(d) {
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = d.getUTCDay() || 7;
@@ -11,10 +11,10 @@ function getWeekNumber(d) {
 }
 
 export default function Home() {
-  // Pásalo a true para Usuario Arcana
+  // Cambiar a `true` para Usuario Arcana (premium)
   const isPremium = true;
 
-  // Temáticas y labels
+  // Temáticas y sus labels
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
   const labels = {
     amor:      "Amor & Relaciones",
@@ -25,7 +25,7 @@ export default function Home() {
   };
   const [selected, setSelected] = useState(themes[0]);
 
-  // Estado de la UI
+  // Estado de UI
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
   const [used, setUsed] = useState(0);
@@ -35,7 +35,7 @@ export default function Home() {
 
   const max = isPremium ? 3 : 1;
 
-  // Período
+  // Clave de período actual
   const getPeriod = () => {
     const now = new Date();
     if (isPremium) {
@@ -45,7 +45,7 @@ export default function Home() {
     return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2, "0")}`;
   };
 
-  // Próximo reset
+  // Fecha de próximo reset
   const getNext = () => {
     const now = new Date();
     let nx;
@@ -60,45 +60,45 @@ export default function Home() {
     return nx;
   };
 
-  // Resetea conteo
+  // Resetea tiradas usadas
   const reset = () => {
     localStorage.setItem("periodKey", getPeriod());
     localStorage.setItem("drawsUsed", "0");
     setUsed(0);
   };
 
-  // Init y programación reset
+  // Init y programación de reset
   useEffect(() => {
     if (typeof window === "undefined") return;
     const stored = localStorage.getItem("periodKey");
     const current = getPeriod();
     if (stored !== current) reset();
-    else setUsed(Number(localStorage.getItem("drawsUsed")||"0"));
+    else setUsed(Number(localStorage.getItem("drawsUsed") || "0"));
 
     const nr = getNext();
     setNextReset(nr);
     const ms = nr.getTime() - Date.now();
     timeoutRef.current = setTimeout(() => {
       reset();
-      const n2 = getNext();
-      setNextReset(n2);
-      const ms2 = n2.getTime() - Date.now();
+      const next2 = getNext();
+      setNextReset(next2);
+      const ms2 = next2.getTime() - Date.now();
       timeoutRef.current = setTimeout(reset, ms2);
     }, ms);
 
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
-  // Contador UI
+  // Contador regresivo
   useEffect(() => {
     if (!nextReset) return;
     const iv = setInterval(() => {
       const diff = nextReset.getTime() - Date.now();
-      if (diff>0) {
-        const d = Math.floor(diff/86400000);
-        const h = Math.floor((diff%86400000)/3600000);
-        const m = Math.floor((diff%3600000)/60000);
-        const s = Math.floor((diff%60000)/1000);
+      if (diff > 0) {
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
         setTimeLeft(`${d}d ${h}h ${m}m ${s}s`);
       } else {
         setTimeLeft("0d 0h 0m 0s");
@@ -107,7 +107,7 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [nextReset]);
 
-  // Obtener lectura
+  // Función para obtener lectura
   const getReading = async () => {
     if (used >= max) return;
     setLoading(true);
@@ -120,7 +120,7 @@ export default function Home() {
       const { reading } = await res.json();
       setReading(reading);
       setUsed(u => {
-        const nu = u+1;
+        const nu = u + 1;
         localStorage.setItem("drawsUsed", String(nu));
         return nu;
       });
@@ -148,7 +148,7 @@ export default function Home() {
       }}>Arcana</h1>
 
       <img
-        src="/Art Glow GIF by xponentialdesign.gif"
+        src="/Art Glow GIF by xperimentaldesign.gif"
         alt="Animación Mística"
         style={{
           width:300, height:300, marginBottom:"2rem",
@@ -166,8 +166,8 @@ export default function Home() {
                 padding:"0.5rem 1rem",
                 border:"1px solid rgba(255,255,255,0.3)",
                 borderRadius:"4px",
-                background:"none",
-                color:"#fff",
+                background: selected === t ? "#fff" : "none",
+                color:        selected === t ? "#000" : "#fff",
                 cursor:"pointer",
                 transition:"background 0.2s, color 0.2s"
               }}
@@ -176,6 +176,7 @@ export default function Home() {
                 e.currentTarget.style.color = "#000";
               }}
               onMouseOut={e => {
+                if (selected === t) return;
                 e.currentTarget.style.background = "none";
                 e.currentTarget.style.color = "#fff";
               }}
@@ -187,7 +188,7 @@ export default function Home() {
       )}
 
       <p style={{ marginBottom:".25rem" }}>
-        <strong>{isPremium?"Usuario Arcana":"Usuario Libre"}</strong>
+        <strong>{isPremium ? "Usuario Arcana" : "Usuario Libre"}</strong>
         {" – Tiradas restantes: "}{left}
       </p>
       <p style={{ marginBottom:"1rem", opacity:0.8 }}>
@@ -196,7 +197,7 @@ export default function Home() {
 
       <button
         onClick={getReading}
-        disabled={left<=0}
+        disabled={left <= 0}
         style={{
           padding:"1rem 2rem", fontSize:"1.25rem",
           border:"none", borderRadius:"8px",
@@ -209,7 +210,7 @@ export default function Home() {
         onMouseOver={e => left>0 && (e.currentTarget.style.transform="scale(1.05)")}
         onMouseOut={e => e.currentTarget.style.transform="scale(1)"}
       >
-        {loading?"Leyendo...":"Haz tu tirada"}
+        {loading ? "Leyendo..." : "Haz tu tirada"}
       </button>
 
       {reading && (
