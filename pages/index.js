@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
-// Utilidad para calcular ISO week number
+// Utilidad para calcular el número ISO de semana
 function getWeekNumber(d) {
-  // Copiado del estándar ISO-8601
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  return Math.ceil( ((((d - yearStart) / 86400000) + 1) / 7) );
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
 export default function Home() {
-  const isPremium = false; // Cambia a true para simular Premium
+  const isPremium = false; // Pon true para simular premium
 
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,66 +20,61 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("");
   const [gifSrc] = useState("/Art Glow GIF by xponentialdesign.gif");
 
-  // Calcula la fecha del próximo reset (lunes o primer día de mes)
+  // Calcula cuándo es el próximo reset
   const getNextResetDate = () => {
     const now = new Date();
     let next;
     if (isPremium) {
-      // Próximo lunes 00:00
       const day = now.getDay();
-      const daysUntilMonday = (8 - day) % 7;
+      const daysUntilMon = (8 - day) % 7;
       next = new Date(now);
-      next.setDate(now.getDate() + daysUntilMonday);
+      next.setDate(now.getDate() + daysUntilMon);
     } else {
-      // Primer día del mes siguiente a las 00:00
-      next = new Date(now.getFullYear(), now.getMonth()+1, 1);
+      next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
-    next.setHours(0,0,0,0);
+    next.setHours(0, 0, 0, 0);
     return next;
   };
 
-  // Identificador de período: "YYYY-M" para mensual, "YYYY-Www" para semanal
+  // Genera un identificador de período
   const getPeriodKey = () => {
     const now = new Date();
     if (isPremium) {
       const week = getWeekNumber(now);
-      return `${now.getFullYear()}-W${week.toString().padStart(2,'0')}`;
+      return `${now.getFullYear()}-W${week.toString().padStart(2, '0')}`;
     } else {
-      return `${now.getFullYear()}-M${(now.getMonth()+1).toString().padStart(2,'0')}`;
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      return `${now.getFullYear()}-M${month}`;
     }
   };
 
-  // Resetea las tiradas al máximo
+  // Resetea las tiradas al máximo y guarda el periodo
   const resetDraws = () => {
     const max = isPremium ? 3 : 1;
     setDrawsLeft(max);
     localStorage.setItem("drawsLeft", max);
-    const period = getPeriodKey();
-    localStorage.setItem("periodKey", period);
+    localStorage.setItem("periodKey", getPeriodKey());
     setNextReset(getNextResetDate());
   };
 
-  // Al montar: comprueba si cambió de período y resetea solo entonces
+  // Al montar: solo resetea si cambió el periodo
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const storedPeriod = localStorage.getItem("periodKey");
-    const currentPeriod = getPeriodKey();
+    const stored = localStorage.getItem("periodKey");
+    const current = getPeriodKey();
     setNextReset(getNextResetDate());
-
-    if (storedPeriod !== currentPeriod) {
-      // Nuevo período → full reset
+    if (stored !== current) {
       resetDraws();
     } else {
-      // Mismo período → restaurar resto de tiradas
       const saved = Number(localStorage.getItem("drawsLeft") || 0);
       setDrawsLeft(saved);
     }
   }, []);
 
-  // Contador regresivo
+  // Contador regresivo y reset puntual
   useEffect(() => {
-    const iv = setInterval(() => {
-      if (!nextReset) return;
+    if (!nextReset) return;
+    const id = setInterval(() => {
       const now = new Date();
       const diff = nextReset - now;
       if (diff > 0) {
@@ -90,14 +84,16 @@ export default function Home() {
         const seconds = Math.floor((diff / 1000) % 60);
         setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
       } else {
+        // Llego el momento de resetear, limpio intervalo y reseteo
+        clearInterval(id);
         setTimeLeft("¡Ya puedes tirar!");
-        clearInterval(iv);
+        resetDraws();
       }
     }, 1000);
-    return () => clearInterval(iv);
+    return () => clearInterval(id);
   }, [nextReset]);
 
-  // Función para pedir lectura
+  // Función para pedir una lectura
   async function getReading() {
     if (drawsLeft <= 0) return;
     setLoading(true);
@@ -128,41 +124,54 @@ export default function Home() {
       <Head>
         <title>Arcana</title>
       </Head>
-      <h1 style={{ fontSize:"3rem", textShadow:"1px 1px 4px rgba(255,255,255,0.3)" }}>
-        Arcana
-      </h1>
+      <h1 style={{
+        fontSize: "3rem",
+        textShadow: "1px 1px 4px rgba(255,255,255,0.3)"
+      }}>Arcana</h1>
       <img
         src={gifSrc}
         alt="Animación Mística"
-        style={{ width:"300px", height:"300px", marginBottom:"2rem", objectFit:"cover" }}
+        style={{
+          width: "300px", height: "300px",
+          marginBottom: "2rem", objectFit: "cover"
+        }}
       />
-      <p style={{ marginBottom:".25rem" }}>
+      <p style={{ marginBottom: ".25rem" }}>
         {isPremium ? "Usuario Premium" : "Usuario Normal"} – Tiradas restantes: {drawsLeft}
       </p>
-      <p style={{ marginBottom:"1rem", fontSize:".9rem", opacity:.8 }}>
-        Próxima tirada disponible en: {timeLeft}
-      </p>
+      <p style={{
+        marginBottom: "1rem",
+        fontSize: ".9rem",
+        opacity: .8
+      }}>Próxima tirada disponible en: {timeLeft}</p>
       <button
         onClick={getReading}
         disabled={drawsLeft <= 0}
         style={{
-          padding:"1rem 2rem", fontSize:"1.25rem",
-          border:"none", borderRadius:"8px",
-          cursor: drawsLeft>0 ? "pointer":"not-allowed",
-          backgroundColor:"#fff", color:"#333",
-          boxShadow:"0 4px 8px rgba(255,255,255,0.2)",
-          transition:"transform .2s", opacity: drawsLeft>0?1:.5
+          padding: "1rem 2rem",
+          fontSize: "1.25rem",
+          border: "none",
+          borderRadius: "8px",
+          cursor: drawsLeft > 0 ? "pointer" : "not-allowed",
+          backgroundColor: "#fff",
+          color: "#333",
+          boxShadow: "0 4px 8px rgba(255,255,255,0.2)",
+          transition: "transform .2s",
+          opacity: drawsLeft > 0 ? 1 : .5
         }}
-        onMouseOver={e=>e.currentTarget.style.transform="scale(1.05)"}
-        onMouseOut={e=>e.currentTarget.style.transform="scale(1)"}
+        onMouseOver={e => e.currentTarget.style.transform = "scale(1.05)"}
+        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
       >
         {loading ? "Leyendo..." : "Haz tu tirada"}
       </button>
       {reading && (
         <div style={{
-          marginTop:"2rem", fontSize:"1.5rem", color:"#fff",
-          background:"rgba(255,255,255,0.1)", padding:"1rem 2rem",
-          borderRadius:"8px", boxShadow:"0 2px 4px rgba(255,255,255,0.2)"
+          marginTop: "2rem",
+          fontSize: "1.5rem",
+          background: "rgba(255,255,255,0.1)",
+          padding: "1rem 2rem",
+          borderRadius: "8px",
+          boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
         }}>
           {reading}
         </div>
