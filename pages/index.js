@@ -11,7 +11,7 @@ function getWeekNumber(d) {
 }
 
 export default function Home() {
-  const isPremium = false; // true = Premium user
+  const isPremium = true; // true = Premium user
 
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
