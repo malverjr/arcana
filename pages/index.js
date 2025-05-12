@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
 // Calcula el número de semana ISO
@@ -11,9 +11,9 @@ function getWeekNumber(d) {
 }
 
 export default function Home() {
-  const isPremium = false; // cambia a true para probar
+  const isPremium = false; // Cambia a true para probar premium
 
-  // Estado interno solo para lectura y UI
+  // Estados para UI
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
   const [drawsUsed, setDrawsUsed] = useState(0);
@@ -21,9 +21,13 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("");
   const [gifSrc] = useState("/Art Glow GIF by xponentialdesign.gif");
 
+  // Máximo de tiradas según tipo de usuario
   const maxDraws = isPremium ? 3 : 1;
 
-  // 1) Identificador de periodo
+  // Flag para que el reset en el intervalo solo ocurra UNA vez
+  const hasResetRef = useRef(false);
+
+  // Identificador de periodo (mes o semana ISO)
   const getPeriodKey = () => {
     const now = new Date();
     if (isPremium) {
@@ -35,7 +39,7 @@ export default function Home() {
     }
   };
 
-  // 2) Fecha de próximo reset
+  // Fecha del próximo reset (mañana lunes o primer día de mes)
   const getNextResetDate = () => {
     const now = new Date();
     let next;
@@ -51,17 +55,21 @@ export default function Home() {
     return next;
   };
 
-  // Al montar, inicializamos drawsUsed y nextReset
+  // Resetea las tiradas usadas y marca nuevo periodo
+  const resetPeriod = () => {
+    localStorage.setItem("periodKey", getPeriodKey());
+    localStorage.setItem("drawsUsed", "0");
+    setDrawsUsed(0);
+  };
+
+  // Al montar: inicializa drawsUsed y nextReset
   useEffect(() => {
     if (typeof window === "undefined") return;
     const storedPeriod = localStorage.getItem("periodKey");
-    const thisPeriod   = getPeriodKey();
+    const currentPeriod = getPeriodKey();
 
-    if (storedPeriod !== thisPeriod) {
-      // Nuevo periodo → reset used to 0
-      localStorage.setItem("periodKey", thisPeriod);
-      localStorage.setItem("drawsUsed", "0");
-      setDrawsUsed(0);
+    if (storedPeriod !== currentPeriod) {
+      resetPeriod();
     } else {
       const used = Number(localStorage.getItem("drawsUsed") || "0");
       setDrawsUsed(used);
@@ -70,12 +78,14 @@ export default function Home() {
     setNextReset(getNextResetDate());
   }, []);
 
-  // Contador de tiempo restante
+  // Contador regresivo y reset puntual solo UNA vez
   useEffect(() => {
     if (!nextReset) return;
-    const id = setInterval(() => {
+    hasResetRef.current = false;
+    const intervalId = setInterval(() => {
       const now = new Date();
       const diff = nextReset - now;
+
       if (diff > 0) {
         const days    = Math.floor(diff / 86400000);
         const hours   = Math.floor((diff % 86400000) / 3600000);
@@ -84,15 +94,21 @@ export default function Home() {
         setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
       } else {
         setTimeLeft("¡Ya puedes tirar!");
-        clearInterval(id);
+        // Reset SOLO LA PRIMERA VEZ que diff llega a <=0
+        if (!hasResetRef.current) {
+          hasResetRef.current = true;
+          resetPeriod();
+          // Actualiza nextReset para el siguiente periodo
+          setNextReset(getNextResetDate());
+        }
       }
     }, 1000);
-    return () => clearInterval(id);
+
+    return () => clearInterval(intervalId);
   }, [nextReset]);
 
-  // Función para pedir lectura
+  // Llama a la API para obtener lectura y marca un uso
   async function getReading() {
-    // Si ya usaste todas las tiradas, no hacer nada
     if (drawsUsed >= maxDraws) return;
 
     setLoading(true);
@@ -102,7 +118,6 @@ export default function Home() {
       const { reading } = await res.json();
       setReading(reading);
 
-      // Incrementa drawsUsed
       setDrawsUsed(prev => {
         const updated = prev + 1;
         localStorage.setItem("drawsUsed", updated.toString());
@@ -129,14 +144,10 @@ export default function Home() {
         fontSize: "3rem",
         textShadow: "1px 1px 4px rgba(255,255,255,0.3)"
       }}>Arcana</h1>
-      <img
-        src={gifSrc}
-        alt="Animación Mística"
-        style={{
-          width: "300px", height: "300px",
-          marginBottom: "2rem", objectFit: "cover"
-        }}
-      />
+      <img src={gifSrc} alt="Animación Mística" style={{
+        width: "300px", height: "300px",
+        marginBottom: "2rem", objectFit: "cover"
+      }} />
       <p style={{ marginBottom: ".25rem" }}>
         {isPremium ? "Usuario Premium" : "Usuario Normal"} – Tiradas restantes: {drawsLeft}
       </p>
@@ -145,27 +156,25 @@ export default function Home() {
         fontSize: ".9rem",
         opacity: .8
       }}>Próxima tirada en: {timeLeft}</p>
-
       <button
         onClick={getReading}
         disabled={drawsLeft <= 0}
         style={{
           padding: "1rem 2rem", fontSize: "1.25rem",
           border: "none", borderRadius: "8px",
-          cursor: drawsLeft>0 ? "pointer":"not-allowed",
+          cursor: drawsLeft > 0 ? "pointer" : "not-allowed",
           backgroundColor: "#fff", color: "#333",
           boxShadow: "0 4px 8px rgba(255,255,255,0.2)",
-          transition: "transform .2s", opacity: drawsLeft>0 ? 1:.5
+          transition: "transform .2s", opacity: drawsLeft > 0 ? 1 : .5
         }}
-        onMouseOver={e=>e.currentTarget.style.transform="scale(1.05)"}
-        onMouseOut={e=>e.currentTarget.style.transform="scale(1)"}
+        onMouseOver={e => e.currentTarget.style.transform = "scale(1.05)"}
+        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
       >
         {loading ? "Leyendo..." : "Haz tu tirada"}
       </button>
-
       {reading && (
         <div style={{
-          marginTop: "2rem", fontSize: "1.5rem", color: "#fff",
+          marginTop: "2rem", fontSize: "1.5rem",
           background: "rgba(255,255,255,0.1)", padding: "1rem 2rem",
           borderRadius: "8px", boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
         }}>
@@ -175,3 +184,4 @@ export default function Home() {
     </div>
   );
 }
+
