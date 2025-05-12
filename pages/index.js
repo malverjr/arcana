@@ -1,135 +1,105 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
-// Calcula el número de semana ISO
-function getWeekNumber(d) {
-  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
-
 export default function Home() {
-  const isPremium = false; // Cambia a true para probar premium
+  // Cambia a true para simular usuario premium
+  const isPremium = false;
 
-  // Estados para UI
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
-  const [drawsUsed, setDrawsUsed] = useState(0);
+  const [drawsLeft, setDrawsLeft] = useState(0);
   const [nextReset, setNextReset] = useState(null);
   const [timeLeft, setTimeLeft] = useState("");
   const [gifSrc] = useState("/Art Glow GIF by xponentialdesign.gif");
 
-  // Máximo de tiradas según tipo de usuario
-  const maxDraws = isPremium ? 3 : 1;
-
-  // Flag para que el reset en el intervalo solo ocurra UNA vez
-  const hasResetRef = useRef(false);
-
-  // Identificador de periodo (mes o semana ISO)
-  const getPeriodKey = () => {
-    const now = new Date();
-    if (isPremium) {
-      const week = getWeekNumber(now);
-      return `${now.getFullYear()}-W${week.toString().padStart(2, '0')}`;
-    } else {
-      const month = (now.getMonth() + 1).toString().padStart(2, '0');
-      return `${now.getFullYear()}-M${month}`;
-    }
-  };
-
-  // Fecha del próximo reset (mañana lunes o primer día de mes)
-  const getNextResetDate = () => {
+  // Calcula cuándo es el próximo reset
+  const getNextReset = () => {
     const now = new Date();
     let next;
     if (isPremium) {
+      // Reset cada lunes 00:00
       const day = now.getDay();
-      const daysUntilMon = (8 - day) % 7;
+      const diff = (8 - day) % 7;
       next = new Date(now);
-      next.setDate(now.getDate() + daysUntilMon);
+      next.setDate(now.getDate() + diff);
     } else {
+      // Reset el día 1 del mes siguiente a las 00:00
       next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
     next.setHours(0, 0, 0, 0);
     return next;
   };
 
-  // Resetea las tiradas usadas y marca nuevo periodo
-  const resetPeriod = () => {
-    localStorage.setItem("periodKey", getPeriodKey());
-    localStorage.setItem("drawsUsed", "0");
-    setDrawsUsed(0);
+  // Reset de tiradas al máximo
+  const resetDraws = () => {
+    const max = isPremium ? 3 : 1;
+    setDrawsLeft(max);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("drawsLeft", max.toString());
+      localStorage.setItem("lastReset", new Date().toISOString());
+    }
+    setNextReset(getNextReset());
   };
 
-  // Al montar: inicializa drawsUsed y nextReset
+  // Al montar, inicializa tiradas y nextReset
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const storedPeriod = localStorage.getItem("periodKey");
-    const currentPeriod = getPeriodKey();
+    const lastResetRaw = localStorage.getItem("lastReset");
+    const now = new Date();
+    const next = getNextReset();
+    setNextReset(next);
 
-    if (storedPeriod !== currentPeriod) {
-      resetPeriod();
+    if (!lastResetRaw) {
+      resetDraws();
     } else {
-      const used = Number(localStorage.getItem("drawsUsed") || "0");
-      setDrawsUsed(used);
+      const lastReset = new Date(lastResetRaw);
+      if (now >= next) {
+        resetDraws();
+      } else {
+        const stored = Number(localStorage.getItem("drawsLeft") || "0");
+        setDrawsLeft(stored);
+      }
     }
-
-    setNextReset(getNextResetDate());
   }, []);
 
-  // Contador regresivo y reset puntual solo UNA vez
+  // Contador regresivo
   useEffect(() => {
     if (!nextReset) return;
-    hasResetRef.current = false;
-    const intervalId = setInterval(() => {
+    const iv = setInterval(() => {
       const now = new Date();
       const diff = nextReset - now;
-
       if (diff > 0) {
-        const days    = Math.floor(diff / 86400000);
-        const hours   = Math.floor((diff % 86400000) / 3600000);
+        const hours = Math.floor(diff / 3600000);
         const minutes = Math.floor((diff % 3600000) / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
-        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        setTimeLeft(`${hours}h ${minutes}m`);
       } else {
         setTimeLeft("¡Ya puedes tirar!");
-        // Reset SOLO LA PRIMERA VEZ que diff llega a <=0
-        if (!hasResetRef.current) {
-          hasResetRef.current = true;
-          resetPeriod();
-          // Actualiza nextReset para el siguiente periodo
-          setNextReset(getNextResetDate());
-        }
+        clearInterval(iv);
+        // opcional: resetDraws();  <-- estaba aquí antes
       }
     }, 1000);
-
-    return () => clearInterval(intervalId);
+    return () => clearInterval(iv);
   }, [nextReset]);
 
-  // Llama a la API para obtener lectura y marca un uso
+  // Obtiene la lectura
   async function getReading() {
-    if (drawsUsed >= maxDraws) return;
-
+    if (drawsLeft <= 0) return;
     setLoading(true);
     setReading("");
     try {
       const res = await fetch('/api/tarot');
       const { reading } = await res.json();
       setReading(reading);
-
-      setDrawsUsed(prev => {
-        const updated = prev + 1;
-        localStorage.setItem("drawsUsed", updated.toString());
-        return updated;
+      setDrawsLeft(prev => {
+        const upd = prev - 1;
+        if (typeof window !== "undefined") localStorage.setItem("drawsLeft", upd.toString());
+        return upd;
       });
     } catch {
       setReading("Error al obtener la tirada. Inténtalo de nuevo.");
     }
     setLoading(false);
   }
-
-  const drawsLeft = maxDraws - drawsUsed;
 
   return (
     <div style={{
@@ -140,43 +110,59 @@ export default function Home() {
       color: "white", padding: "0 1rem"
     }}>
       <Head><title>Arcana</title></Head>
+
       <h1 style={{
         fontSize: "3rem",
         textShadow: "1px 1px 4px rgba(255,255,255,0.3)"
       }}>Arcana</h1>
-      <img src={gifSrc} alt="Animación Mística" style={{
-        width: "300px", height: "300px",
-        marginBottom: "2rem", objectFit: "cover"
-      }} />
-      <p style={{ marginBottom: ".25rem" }}>
+
+      <img
+        src={gifSrc}
+        alt="Animación Mística"
+        style={{
+          width: "300px",
+          height: "300px",
+          marginBottom: "2rem",
+          objectFit: "cover"
+        }}
+      />
+
+      <p style={{ marginBottom: "0.25rem" }}>
         {isPremium ? "Usuario Premium" : "Usuario Normal"} – Tiradas restantes: {drawsLeft}
       </p>
-      <p style={{
-        marginBottom: "1rem",
-        fontSize: ".9rem",
-        opacity: .8
-      }}>Próxima tirada en: {timeLeft}</p>
+      <p style={{ marginBottom: "1rem", fontSize: "0.9rem", opacity: 0.8 }}>
+        Próxima tirada disponible en: {timeLeft}
+      </p>
+
       <button
         onClick={getReading}
         disabled={drawsLeft <= 0}
         style={{
-          padding: "1rem 2rem", fontSize: "1.25rem",
-          border: "none", borderRadius: "8px",
+          padding: "1rem 2rem",
+          fontSize: "1.25rem",
+          border: "none",
+          borderRadius: "8px",
           cursor: drawsLeft > 0 ? "pointer" : "not-allowed",
-          backgroundColor: "#fff", color: "#333",
+          backgroundColor: "#fff",
+          color: "#333",
           boxShadow: "0 4px 8px rgba(255,255,255,0.2)",
-          transition: "transform .2s", opacity: drawsLeft > 0 ? 1 : .5
+          transition: "transform 0.2s",
+          opacity: drawsLeft > 0 ? 1 : 0.5
         }}
         onMouseOver={e => e.currentTarget.style.transform = "scale(1.05)"}
         onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
       >
         {loading ? "Leyendo..." : "Haz tu tirada"}
       </button>
+
       {reading && (
         <div style={{
-          marginTop: "2rem", fontSize: "1.5rem",
-          background: "rgba(255,255,255,0.1)", padding: "1rem 2rem",
-          borderRadius: "8px", boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
+          marginTop: "2rem",
+          fontSize: "1.5rem",
+          background: "rgba(255,255,255,0.1)",
+          padding: "1rem 2rem",
+          borderRadius: "8px",
+          boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
         }}>
           {reading}
         </div>
@@ -184,4 +170,3 @@ export default function Home() {
     </div>
   );
 }
-
