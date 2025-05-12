@@ -12,7 +12,7 @@ function getWeekNumber(date) {
 
 export default function Home() {
   // Cambia a `true` para probar modo Usuario Arcana
-  const isPremium = false;
+  const isPremium = true;
 
   // Temáticas para Usuario Arcana
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
