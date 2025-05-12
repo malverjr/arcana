@@ -1,121 +1,117 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
-// Obtiene número de semana ISO del año
+// Calcula número de semana ISO
 function getWeekNumber(d) {
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
 export default function Home() {
-  const isPremium = true; // 👉 Pásalo a true para probar premium
+  const isPremium = false; // true = Premium user
 
-  // UI state
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
   const [drawsUsed, setDrawsUsed] = useState(0);
   const [nextReset, setNextReset] = useState(null);
   const [timeLeft, setTimeLeft] = useState("");
-  const [gifSrc] = useState("/Art Glow GIF by xponentialdesign.gif");
-
-  const maxDraws = isPremium ? 3 : 1;
   const resetTimeoutRef = useRef(null);
+  const maxDraws = isPremium ? 3 : 1;
 
-  // 1) Construye el key de período actual
+  // 1. Period key
   const getPeriodKey = () => {
     const now = new Date();
     if (isPremium) {
       const w = getWeekNumber(now);
-      return `${now.getFullYear()}-W${w.toString().padStart(2, "0")}`;
+      return `${now.getFullYear()}-W${String(w).padStart(2,'0')}`;
     } else {
-      const m = (now.getMonth() + 1).toString().padStart(2, "0");
+      const m = String(now.getMonth()+1).padStart(2,'0');
       return `${now.getFullYear()}-M${m}`;
     }
   };
 
-  // 2) Calcula la próxima fecha de reset
+  // 2. Next reset date
   const getNextResetDate = () => {
     const now = new Date();
     let nxt;
     if (isPremium) {
-      const day = now.getDay(),
-            daysToMon = (8 - day) % 7;
+      const daysToMon = (8 - now.getDay()) % 7;
       nxt = new Date(now);
       nxt.setDate(now.getDate() + daysToMon);
     } else {
-      nxt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      nxt = new Date(now.getFullYear(), now.getMonth()+1, 1);
     }
-    nxt.setHours(0, 0, 0, 0);
+    nxt.setHours(0,0,0,0);
     return nxt;
   };
 
-  // 3) Resetea tiradas usadas
+  // 3. Reset period usage
   const resetPeriod = () => {
-    localStorage.setItem("periodKey", getPeriodKey());
+    const key = getPeriodKey();
+    localStorage.setItem("periodKey", key);
     localStorage.setItem("drawsUsed", "0");
     setDrawsUsed(0);
   };
 
-  // 4) Al montar: inicializa drawsUsed y programa el reset futuro
+  // 4. On mount: init drawsUsed, schedule reset
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    const stored = localStorage.getItem("periodKey"),
-          current = getPeriodKey();
-
+    const stored = localStorage.getItem("periodKey");
+    const current = getPeriodKey();
     if (stored !== current) resetPeriod();
-    else setDrawsUsed(Number(localStorage.getItem("drawsUsed") || "0"));
+    else setDrawsUsed(+localStorage.getItem("drawsUsed")||0);
 
-    // Programa el reset exacto
-    const next = getNextResetDate();
-    setNextReset(next);
-    const msUntil = next.getTime() - Date.now();
+    const nr = getNextResetDate();
+    setNextReset(nr);
+    const ms = nr.getTime() - Date.now();
     resetTimeoutRef.current = setTimeout(() => {
       resetPeriod();
-      // y reprograma el siguiente reset
-      const following = getNextResetDate();
-      setNextReset(following);
-      const ms2 = following.getTime() - Date.now();
+      // schedule next reset
+      const next2 = getNextResetDate();
+      setNextReset(next2);
+      const ms2 = next2.getTime() - Date.now();
       resetTimeoutRef.current = setTimeout(resetPeriod, ms2);
-    }, msUntil);
+    }, ms);
 
-    return () => clearTimeout(resetTimeoutRef.current);
+    return ()=>{
+      clearTimeout(resetTimeoutRef.current);
+    };
   }, []);
 
-  // 5) Solo UI: contador regresivo
+  // 5. Pure countdown UI
   useEffect(() => {
     if (!nextReset) return;
-    const iv = setInterval(() => {
-      const diff = nextReset - new Date();
-      if (diff > 0) {
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+    const iv = setInterval(()=>{
+      const diff = nextReset - Date.now();
+      if (diff>0) {
+        const d = Math.floor(diff/86400000);
+        const h = Math.floor((diff%86400000)/3600000);
+        const m = Math.floor((diff%3600000)/60000);
+        const s = Math.floor((diff%60000)/1000);
         setTimeLeft(`${d}d ${h}h ${m}m ${s}s`);
       } else {
-        setTimeLeft("¡Ya puedes tirar!");
+        setTimeLeft(`0d 0h 0m 0s`);
       }
-    }, 500);
-    return () => clearInterval(iv);
-  }, [nextReset]);
+    },500);
+    return ()=>clearInterval(iv);
+  },[nextReset]);
 
-  // 6) Lanza la API y marca un uso
-  const getReading = async () => {
-    if (drawsUsed >= maxDraws) return;
+  // 6. Fetch reading & mark usage
+  const getReading = async ()=>{
+    if (drawsUsed>=maxDraws) return;
     setLoading(true);
     setReading("");
     try {
-      const res = await fetch("/api/tarot");
+      const res = await fetch('/api/tarot');
       const { reading } = await res.json();
       setReading(reading);
-      setDrawsUsed(prev => {
-        const upd = prev + 1;
-        localStorage.setItem("drawsUsed", upd.toString());
-        return upd;
+      setDrawsUsed(prev=>{
+        const u = prev+1;
+        localStorage.setItem("drawsUsed", String(u));
+        return u;
       });
     } catch {
       setReading("Error al obtener la tirada. Inténtalo de nuevo.");
@@ -127,68 +123,42 @@ export default function Home() {
 
   return (
     <div style={{
-      display: "flex", flexDirection: "column",
-      justifyContent: "center", alignItems: "center",
-      minHeight: "100vh", background: "black",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      color: "white", padding: "0 1rem"
+      display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',
+      minHeight:'100vh',background:'black',color:'white',
+      fontFamily:"'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      padding:'0 1rem'
     }}>
       <Head><title>Arcana</title></Head>
-
-      <h1 style={{
-        fontSize: "3rem",
-        textShadow: "1px 1px 4px rgba(255,255,255,0.3)"
-      }}>Arcana</h1>
-
+      <h1 style={{fontSize:'3rem',textShadow:'1px 1px 4px rgba(255,255,255,0.3)'}}>Arcana</h1>
       <img
-        src={gifSrc}
+        src="/Art Glow GIF by xponentialdesign.gif"
         alt="Animación Mística"
-        style={{
-          width: "300px", height: "300px",
-          marginBottom: "2rem", objectFit: "cover"
-        }}
+        style={{width:300,height:300,marginBottom:'2rem',objectFit:'cover'}}
       />
-
-      <p style={{ marginBottom: ".25rem" }}>
-        {isPremium ? "Usuario Premium" : "Usuario Normal"} – Tiradas restantes: {drawsLeft}
+      <p style={{marginBottom:4}}>
+        {isPremium?'Usuario Premium':'Usuario Normal'} – Tiradas restantes: {drawsLeft}
       </p>
-      <p style={{
-        marginBottom: "1rem",
-        fontSize: ".9rem",
-        opacity: .8
-      }}>
+      <p style={{marginBottom:'1rem',opacity:0.8}}>
         Próxima tirada en: {timeLeft}
       </p>
-
       <button
         onClick={getReading}
-        disabled={drawsLeft <= 0}
+        disabled={drawsLeft<=0}
         style={{
-          padding: "1rem 2rem",
-          fontSize: "1.25rem",
-          border: "none",
-          borderRadius: "8px",
-          cursor: drawsLeft > 0 ? "pointer" : "not-allowed",
-          backgroundColor: "#fff",
-          color: "#333",
-          boxShadow: "0 4px 8px rgba(255,255,255,0.2)",
-          transition: "transform 0.2s",
-          opacity: drawsLeft > 0 ? 1 : .5
+          padding:'1rem 2rem',fontSize:'1.25rem',border:'none',borderRadius:8,
+          cursor:drawsLeft>0?'pointer':'not-allowed',background:'#fff',color:'#333',
+          boxShadow:'0 4px 8px rgba(255,255,255,0.2)',transition:'transform .2s',
+          opacity:drawsLeft>0?1:0.5
         }}
-        onMouseOver={e => e.currentTarget.style.transform = "scale(1.05)"}
-        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
+        onMouseOver={e=>e.currentTarget.style.transform='scale(1.05)'}
+        onMouseOut={e=>e.currentTarget.style.transform='scale(1)'}
       >
-        {loading ? "Leyendo..." : "Haz tu tirada"}
+        {loading?'Leyendo...':'Haz tu tirada'}
       </button>
-
       {reading && (
         <div style={{
-          marginTop: "2rem",
-          fontSize: "1.5rem",
-          background: "rgba(255,255,255,0.1)",
-          padding: "1rem 2rem",
-          borderRadius: "8px",
-          boxShadow: "0 2px 4px rgba(255,255,255,0.2)"
+          marginTop:'2rem',padding:'1rem 2rem',background:'rgba(255,255,255,0.1)',
+          borderRadius:8,boxShadow:'0 2px 4px rgba(255,255,255,0.2)',fontSize:'1.5rem'
         }}>
           {reading}
         </div>
