@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
 export default function Home() {
-  const isPremium = false;
+  const isPremium = true;
 
   const [reading, setReading] = useState("");
   const [loading, setLoading] = useState(false);
