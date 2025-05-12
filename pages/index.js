@@ -11,7 +11,7 @@ function getWeekNumber(d) {
 }
 
 export default function Home() {
-  const isPremium = false; // 👉 Pásalo a true para probar premium
+  const isPremium = true; // 👉 Pásalo a true para probar premium
 
   // UI state
   const [reading, setReading] = useState("");
