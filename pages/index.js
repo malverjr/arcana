@@ -6,13 +6,13 @@ function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getFullYear(), 0, 1));
+  const yearStart = new Date(Date.UTC(d.getUTCDay(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
 export default function Home() {
   // Rol de usuario: "free", "premium", "admin"
-  const userRole = 'admin'; 
+  const userRole = 'admin';
   const isPremium = userRole === 'premium' || userRole === 'admin';
   const isAdmin   = userRole === 'admin';
 
@@ -57,7 +57,7 @@ export default function Home() {
       nxt = new Date(now);
       nxt.setDate(now.getDate() + daysToMonday);
     } else {
-      nxt = new Date(now.getFullYear(), now.getMonth()+1, 1);
+      nxt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
     nxt.setHours(0,0,0,0);
     return nxt;
@@ -150,22 +150,23 @@ export default function Home() {
       <Head><title>Arcana</title></Head>
 
       <h1 style={{
-        fontSize:     '3rem',
-        letterSpacing:'0.05em',
-        marginBottom: '2rem'
+        fontSize:      '3rem',
+        letterSpacing: '0.05em',
+        marginBottom:  '2rem'
       }}>
         Arcana
       </h1>
 
-      {/* GIF corregido */}
+      {/* GIF original con animación float */}
       <img
-        src="/cube.gif"
+        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
         alt="Animación Mística"
         style={{
           width:        '300px',
           height:       '300px',
           marginBottom: '2.5rem',
-          objectFit:    'cover'
+          objectFit:    'cover',
+          animation:    'float 4s ease-in-out infinite'
         }}
       />
 
@@ -200,7 +201,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Rol en negrita como querías */}
       <p style={{ marginBottom:'0.5rem', letterSpacing:'0.02em', fontSize:'1rem' }}>
         <strong>
           {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
@@ -247,6 +247,10 @@ export default function Home() {
       )}
 
       <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-10px); }
+        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
