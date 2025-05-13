@@ -11,10 +11,12 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  // Cambia a `true` para Usuario Arcana (premium)
-  const isPremium = true;
+  // Rol de usuario: "free", "premium", "admin"
+  const userRole = 'admin'; 
+  const isPremium = userRole === 'premium' || userRole === 'admin';
+  const isAdmin   = userRole === 'admin';
 
-  // Temáticas y sus labels
+  // Temáticas y sus labels (solo para premium)
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
   const labels = {
     amor:      "Amor & Relaciones",
@@ -33,23 +35,24 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
 
-  const maxDraws = isPremium ? 3 : 1;
+  // Máximo de tiradas según rol
+  const maxDraws = isAdmin ? Infinity : isPremium ? 3 : 1;
 
-  // Clave de período actual
+  // Clave del período actual
   const getPeriodKey = () => {
     const now = new Date();
-    if (isPremium) {
+    if (isPremium && !isAdmin) {
       const w = getWeekNumber(now);
-      return `${now.getFullYear()}-W${String(w).padStart(2,"0")}`;
+      return `${now.getFullYear()}-W${String(w).padStart(2,'0')}`;
     }
-    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,"0")}`;
+    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,'0')}`;
   };
 
-  // Fecha del próximo reset
+  // Fecha exacta del próximo reset
   const getNextResetDate = () => {
     const now = new Date();
     let nxt;
-    if (isPremium) {
+    if (isPremium && !isAdmin) {
       const daysToMonday = (8 - now.getDay()) % 7;
       nxt = new Date(now);
       nxt.setDate(now.getDate() + daysToMonday);
@@ -60,17 +63,16 @@ export default function Home() {
     return nxt;
   };
 
-  // Reinicia conteo de tiradas
+  // Resetea el conteo de tiradas
   const resetPeriod = () => {
     localStorage.setItem("periodKey", getPeriodKey());
     localStorage.setItem("drawsUsed", "0");
     setUsed(0);
   };
 
-  // Inicialización y scheduling de reset
+  // Init / schedule reset
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
+    if (typeof window === 'undefined') return;
     const stored = localStorage.getItem("periodKey");
     const current = getPeriodKey();
     if (stored !== current) resetPeriod();
@@ -90,7 +92,7 @@ export default function Home() {
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
-  // Contador regresivo
+  // Contador regresivo UI
   useEffect(() => {
     if (!nextReset) return;
     const iv = setInterval(() => {
@@ -108,7 +110,7 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [nextReset]);
 
-  // Solicita lectura
+  // Solicita lectura y cuenta uso
   const getReading = async () => {
     if (used >= maxDraws) return;
     setLoading(true);
@@ -120,6 +122,7 @@ export default function Home() {
       const res = await fetch(url);
       const { reading } = await res.json();
       setReading(reading);
+      // guardar y animar
       setUsed(u => {
         const nu = u + 1;
         localStorage.setItem("drawsUsed", String(nu));
@@ -135,58 +138,60 @@ export default function Home() {
 
   return (
     <div style={{
-      display:        "flex",
-      flexDirection:  "column",
-      alignItems:     "center",
-      justifyContent: "center",
-      minHeight:      "100vh",
-      background:     "black",
-      color:          "white",
-      fontFamily:     "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      padding:        "0 1rem"
+      display:        'flex',
+      flexDirection:  'column',
+      alignItems:     'center',
+      justifyContent: 'center',
+      minHeight:      '100vh',
+      background:     '#000',
+      color:          '#fff',
+      fontFamily:     `"SF Pro Text", BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, "Oxygen", Ubuntu, "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif`,
+      padding:        '2rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
 
       <h1 style={{
-        fontSize:      "3rem",
-        textShadow:    "1px 1px 4px rgba(0,0,0,0.3)",
-        marginBottom:  "1.5rem"
-      }}>Arcana</h1>
+        fontSize:     '3rem',
+        letterSpacing:'0.05em',
+        marginBottom: '2rem'
+      }}>
+        Arcana
+      </h1>
 
       <img
-        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+        src="/Art Glow GIF by xperimentaldesign.gif"
         alt="Animación Mística"
         style={{
-          width:       "300px",
-          height:      "300px",
-          marginBottom:"2rem",
-          objectFit:   "cover"
+          width:        '300px',
+          height:       '300px',
+          marginBottom: '2.5rem',
+          objectFit:    'cover'
         }}
       />
 
-      {isPremium && (
-        <div style={{ display:"flex", gap:"0.5rem", marginBottom:"1.5rem" }}>
+      {isPremium && !isAdmin && (
+        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'2rem' }}>
           {themes.map(t => (
             <button
               key={t}
               onClick={() => setSelected(t)}
               style={{
-                padding:     "0.5rem 1rem",
-                border:      "1px solid rgba(255,255,255,0.3)",
-                borderRadius:"4px",
-                background:  selected === t ? "#fff" : "none",
-                color:       selected === t ? "#000" : "#fff",
-                cursor:      "pointer",
-                transition:  "background 0.2s, color 0.2s"
+                padding:     '0.5rem 1rem',
+                border:      '1px solid rgba(255,255,255,0.3)',
+                borderRadius:'4px',
+                background:  selected===t ? '#fff' : 'none',
+                color:       selected===t ? '#000' : '#fff',
+                cursor:      'pointer',
+                transition:  'background 0.2s, color 0.2s'
               }}
               onMouseOver={e => {
-                e.currentTarget.style.background = "#fff";
-                e.currentTarget.style.color = "#000";
+                e.currentTarget.style.background = '#fff';
+                e.currentTarget.style.color = '#000';
               }}
               onMouseOut={e => {
-                if (selected === t) return;
-                e.currentTarget.style.background = "none";
-                e.currentTarget.style.color = "#fff";
+                if (selected===t) return;
+                e.currentTarget.style.background = 'none';
+                e.currentTarget.style.color = '#fff';
               }}
             >
               {labels[t]}
@@ -195,46 +200,63 @@ export default function Home() {
         </div>
       )}
 
-      {/* Aquí aplicamos el estilo de Apple-like a estas dos líneas */}
-      <p style={{ marginBottom: "0.25rem", fontSize: "1rem" }}>
-        <strong>{isPremium ? "Usuario Arcana" : "Usuario Libre"}</strong> – Tiradas restantes: {drawsLeft}
+      {/* Interletrado y padding extra */}
+      <p style={{ marginBottom:'0.5rem', letterSpacing:'0.02em', fontSize:'1rem' }}>
+        {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'} – Tiradas restantes: {isFinite(drawsLeft) ? drawsLeft : '∞'}
       </p>
-      <p style={{ marginBottom: "1rem", fontSize: "0.9rem", opacity: 0.8 }}>
+      <p style={{ marginBottom:'2.5rem', letterSpacing:'0.02em', fontSize:'0.9rem', opacity:0.8 }}>
         Próxima tirada en: {timeLeft}
       </p>
-      {/* Fin del cambio */}
 
       <button
-        onClick={getReading}
-        disabled={drawsLeft <= 0}
-        style={{
-          padding:        "1rem 2rem",
-          fontSize:       "1.25rem",
-          border:         "none",
-          borderRadius:   "8px",
-          backgroundColor:"#fff",
-          color:          "#333",
-          boxShadow:      "0 4px 8px rgba(0,0,0,0.2)",
-          cursor:         drawsLeft > 0 ? "pointer" : "not-allowed",
-          opacity:        drawsLeft > 0 ? 1 : 0.5,
-          transition:     "transform 0.2s"
+        onClick={e=>{
+          // bounce micro-animación
+          e.currentTarget.style.animation = 'bounce 0.3s ease';
+          getReading();
         }}
-        onMouseOver={e => drawsLeft>0 && (e.currentTarget.style.transform = "scale(1.05)")}
-        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
+        onAnimationEnd={e=>{ e.currentTarget.style.animation = ''; }}
+        disabled={drawsLeft<=0 && !isAdmin}
+        style={{
+          padding:        '1rem 2rem',
+          fontSize:       '1.25rem',
+          border:         'none',
+          borderRadius:   '8px',
+          backgroundColor:'#fff',
+          color:          '#333',
+          boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
+          cursor:         drawsLeft>0 || isAdmin ? 'pointer' : 'not-allowed',
+          opacity:        drawsLeft>0 || isAdmin ? 1 : 0.5,
+          transition:     'transform 0.2s'
+        }}
       >
-        {loading ? "Leyendo..." : "Haz tu tirada"}
+        {loading ? 'Leyendo…' : 'Haz tu tirada'}
       </button>
 
       {reading && (
-        <div style={{
-          marginTop:   "2rem",
-          padding:     "1rem 2rem",
-          background:  "rgba(200,200,200,0.2)",
-          borderRadius:"8px"
-        }}>
+        <div
+          style={{
+            marginTop:    '2rem',
+            padding:      '1rem 2rem',
+            background:   'rgba(200,200,200,0.2)',
+            borderRadius: '8px',
+            animation:    'fadeIn 0.5s ease'
+          }}
+        >
           {reading}
         </div>
       )}
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes bounce {
+          0%   { transform: scale(1); }
+          50%  { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
