@@ -11,10 +11,10 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  // Ponlo a `true` para Usuario Arcana premium
+  // Cambia a `true` para Usuario Arcana (premium)
   const isPremium = true;
 
-  // Temáticas y etiquetas
+  // Temáticas y sus labels
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
   const labels = {
     amor:      "Amor & Relaciones",
@@ -35,7 +35,7 @@ export default function Home() {
 
   const maxDraws = isPremium ? 3 : 1;
 
-  // Genera la clave del período actual
+  // Clave de período actual
   const getPeriodKey = () => {
     const now = new Date();
     if (isPremium) {
@@ -45,7 +45,7 @@ export default function Home() {
     return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,"0")}`;
   };
 
-  // Calcula la fecha del próximo reset
+  // Fecha del próximo reset
   const getNextResetDate = () => {
     const now = new Date();
     let nxt;
@@ -60,24 +60,21 @@ export default function Home() {
     return nxt;
   };
 
-  // Reinicia el conteo de tiradas
+  // Reinicia conteo de tiradas
   const resetPeriod = () => {
     localStorage.setItem("periodKey", getPeriodKey());
     localStorage.setItem("drawsUsed", "0");
     setUsed(0);
   };
 
-  // Inicialización y programación de reset
+  // Inicialización y scheduling de reset
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const stored = localStorage.getItem("periodKey");
     const current = getPeriodKey();
-    if (stored !== current) {
-      resetPeriod();
-    } else {
-      setUsed(Number(localStorage.getItem("drawsUsed") || "0"));
-    }
+    if (stored !== current) resetPeriod();
+    else setUsed(Number(localStorage.getItem("drawsUsed") || "0"));
 
     const nr = getNextResetDate();
     setNextReset(nr);
@@ -93,7 +90,7 @@ export default function Home() {
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
-  // Contador regresivo para la UI
+  // Contador regresivo
   useEffect(() => {
     if (!nextReset) return;
     const iv = setInterval(() => {
@@ -111,7 +108,7 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [nextReset]);
 
-  // Obtiene la lectura del API y cuenta el uso
+  // Solicita lectura
   const getReading = async () => {
     if (used >= maxDraws) return;
     setLoading(true);
@@ -148,20 +145,16 @@ export default function Home() {
       fontFamily:     "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       padding:        "0 1rem"
     }}>
-      <Head>
-        <title>Arcana</title>
-      </Head>
+      <Head><title>Arcana</title></Head>
 
       <h1 style={{
         fontSize:      "3rem",
         textShadow:    "1px 1px 4px rgba(0,0,0,0.3)",
         marginBottom:  "1.5rem"
-      }}>
-        Arcana
-      </h1>
+      }}>Arcana</h1>
 
       <img
-        src="/Art Glow GIF by xponentialdesign.gif"
+        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
         alt="Animación Mística"
         style={{
           width:       "300px",
@@ -178,13 +171,13 @@ export default function Home() {
               key={t}
               onClick={() => setSelected(t)}
               style={{
-                padding:    "0.5rem 1rem",
-                border:     "1px solid rgba(255,255,255,0.3)",
+                padding:     "0.5rem 1rem",
+                border:      "1px solid rgba(255,255,255,0.3)",
                 borderRadius:"4px",
-                background: drawsLeft >= 0 && selected === t ? "#fff" : "none",
-                color:      drawsLeft >= 0 && selected === t ? "#000" : "#fff",
-                cursor:     "pointer",
-                transition: "background 0.2s, color 0.2s"
+                background:  selected === t ? "#fff" : "none",
+                color:       selected === t ? "#000" : "#fff",
+                cursor:      "pointer",
+                transition:  "background 0.2s, color 0.2s"
               }}
               onMouseOver={e => {
                 e.currentTarget.style.background = "#fff";
@@ -202,13 +195,14 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{ marginBottom:"0.25rem" }}>
-        <strong>{isPremium ? "Usuario Arcana" : "Usuario Libre"}</strong>
-        {" – Tiradas restantes: "}{drawsLeft}
+      {/* Aquí aplicamos el estilo de Apple-like a estas dos líneas */}
+      <p style={{ marginBottom: "0.25rem", fontSize: "1rem" }}>
+        <strong>{isPremium ? "Usuario Arcana" : "Usuario Libre"}</strong> – Tiradas restantes: {drawsLeft}
       </p>
-      <p style={{ marginBottom:"1rem", opacity:0.8 }}>
+      <p style={{ marginBottom: "1rem", fontSize: "0.9rem", opacity: 0.8 }}>
         Próxima tirada en: {timeLeft}
       </p>
+      {/* Fin del cambio */}
 
       <button
         onClick={getReading}
@@ -221,8 +215,8 @@ export default function Home() {
           backgroundColor:"#fff",
           color:          "#333",
           boxShadow:      "0 4px 8px rgba(0,0,0,0.2)",
-          cursor:         drawsLeft>0 ? "pointer" : "not-allowed",
-          opacity:        drawsLeft>0 ? 1 : 0.5,
+          cursor:         drawsLeft > 0 ? "pointer" : "not-allowed",
+          opacity:        drawsLeft > 0 ? 1 : 0.5,
           transition:     "transform 0.2s"
         }}
         onMouseOver={e => drawsLeft>0 && (e.currentTarget.style.transform = "scale(1.05)")}
