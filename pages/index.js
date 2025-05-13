@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
 // Calcula el número de semana ISO del año
-function getWeekNumber(d) {
-  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
@@ -11,10 +11,10 @@ function getWeekNumber(d) {
 }
 
 export default function Home() {
-  // Cambiar a `true` para Usuario Arcana (premium)
+  // Ponlo a `true` para Usuario Arcana premium
   const isPremium = true;
 
-  // Temáticas y sus labels
+  // Temáticas y etiquetas
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
   const labels = {
     amor:      "Amor & Relaciones",
@@ -25,71 +25,75 @@ export default function Home() {
   };
   const [selected, setSelected] = useState(themes[0]);
 
-  // Estado de UI
-  const [reading, setReading] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [used, setUsed] = useState(0);
-  const [nextReset, setNextReset] = useState(null);
+  // Estados de UI
+  const [reading,  setReading]  = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [used,     setUsed]     = useState(0);
+  const [nextReset,setNextReset]= useState(null);
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
 
-  const max = isPremium ? 3 : 1;
+  const maxDraws = isPremium ? 3 : 1;
 
-  // Clave de período actual
-  const getPeriod = () => {
+  // Genera la clave del período actual
+  const getPeriodKey = () => {
     const now = new Date();
     if (isPremium) {
       const w = getWeekNumber(now);
-      return `${now.getFullYear()}-W${String(w).padStart(2, "0")}`;
+      return `${now.getFullYear()}-W${String(w).padStart(2,"0")}`;
     }
-    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2, "0")}`;
+    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,"0")}`;
   };
 
-  // Fecha de próximo reset
-  const getNext = () => {
+  // Calcula la fecha del próximo reset
+  const getNextResetDate = () => {
     const now = new Date();
-    let nx;
+    let nxt;
     if (isPremium) {
-      const daysToMon = (8 - now.getDay()) % 7;
-      nx = new Date(now);
-      nx.setDate(now.getDate() + daysToMon);
+      const daysToMonday = (8 - now.getDay()) % 7;
+      nxt = new Date(now);
+      nxt.setDate(now.getDate() + daysToMonday);
     } else {
-      nx = new Date(now.getFullYear(), now.getMonth()+1, 1);
+      nxt = new Date(now.getFullYear(), now.getMonth()+1, 1);
     }
-    nx.setHours(0,0,0,0);
-    return nx;
+    nxt.setHours(0,0,0,0);
+    return nxt;
   };
 
-  // Resetea tiradas usadas
-  const reset = () => {
-    localStorage.setItem("periodKey", getPeriod());
+  // Reinicia el conteo de tiradas
+  const resetPeriod = () => {
+    localStorage.setItem("periodKey", getPeriodKey());
     localStorage.setItem("drawsUsed", "0");
     setUsed(0);
   };
 
-  // Init y programación de reset
+  // Inicialización y programación de reset
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = localStorage.getItem("periodKey");
-    const current = getPeriod();
-    if (stored !== current) reset();
-    else setUsed(Number(localStorage.getItem("drawsUsed") || "0"));
 
-    const nr = getNext();
+    const stored = localStorage.getItem("periodKey");
+    const current = getPeriodKey();
+    if (stored !== current) {
+      resetPeriod();
+    } else {
+      setUsed(Number(localStorage.getItem("drawsUsed") || "0"));
+    }
+
+    const nr = getNextResetDate();
     setNextReset(nr);
-    const ms = nr.getTime() - Date.now();
+    const msUntil = nr.getTime() - Date.now();
     timeoutRef.current = setTimeout(() => {
-      reset();
-      const next2 = getNext();
+      resetPeriod();
+      const next2 = getNextResetDate();
       setNextReset(next2);
       const ms2 = next2.getTime() - Date.now();
-      timeoutRef.current = setTimeout(reset, ms2);
-    }, ms);
+      timeoutRef.current = setTimeout(resetPeriod, ms2);
+    }, msUntil);
 
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
-  // Contador regresivo
+  // Contador regresivo para la UI
   useEffect(() => {
     if (!nextReset) return;
     const iv = setInterval(() => {
@@ -107,9 +111,9 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [nextReset]);
 
-  // Función para obtener lectura
+  // Obtiene la lectura del API y cuenta el uso
   const getReading = async () => {
-    if (used >= max) return;
+    if (used >= maxDraws) return;
     setLoading(true);
     setReading("");
     try {
@@ -130,29 +134,40 @@ export default function Home() {
     setLoading(false);
   };
 
-  const left = max - used;
+  const drawsLeft = maxDraws - used;
 
   return (
     <div style={{
-      display:"flex", flexDirection:"column",
-      alignItems:"center", justifyContent:"center",
-      minHeight:"100vh", background:"#000", color:"#fff",
-      fontFamily:"'Segoe UI', Tahoma, Geneva, sans-serif",
-      padding:"0 1rem"
+      display:        "flex",
+      flexDirection:  "column",
+      alignItems:     "center",
+      justifyContent: "center",
+      minHeight:      "100vh",
+      background:     "black",
+      color:          "white",
+      fontFamily:     "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      padding:        "0 1rem"
     }}>
-      <Head><title>Arcana</title></Head>
+      <Head>
+        <title>Arcana</title>
+      </Head>
 
       <h1 style={{
-        fontSize:"3rem", textShadow:"1px 1px 4px rgba(0,0,0,0.3)",
-        marginBottom:"1.5rem"
-      }}>Arcana</h1>
+        fontSize:      "3rem",
+        textShadow:    "1px 1px 4px rgba(0,0,0,0.3)",
+        marginBottom:  "1.5rem"
+      }}>
+        Arcana
+      </h1>
 
       <img
-        src="/Art Glow GIF by xperimentaldesign.gif"
+        src="/Art Glow GIF by xponentialdesign.gif"
         alt="Animación Mística"
         style={{
-          width:300, height:300, marginBottom:"2rem",
-          objectFit:"cover"
+          width:       "300px",
+          height:      "300px",
+          marginBottom:"2rem",
+          objectFit:   "cover"
         }}
       />
 
@@ -163,13 +178,13 @@ export default function Home() {
               key={t}
               onClick={() => setSelected(t)}
               style={{
-                padding:"0.5rem 1rem",
-                border:"1px solid rgba(255,255,255,0.3)",
+                padding:    "0.5rem 1rem",
+                border:     "1px solid rgba(255,255,255,0.3)",
                 borderRadius:"4px",
-                background: selected === t ? "#fff" : "none",
-                color:        selected === t ? "#000" : "#fff",
-                cursor:"pointer",
-                transition:"background 0.2s, color 0.2s"
+                background: drawsLeft >= 0 && selected === t ? "#fff" : "none",
+                color:      drawsLeft >= 0 && selected === t ? "#000" : "#fff",
+                cursor:     "pointer",
+                transition: "background 0.2s, color 0.2s"
               }}
               onMouseOver={e => {
                 e.currentTarget.style.background = "#fff";
@@ -187,9 +202,9 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{ marginBottom:".25rem" }}>
+      <p style={{ marginBottom:"0.25rem" }}>
         <strong>{isPremium ? "Usuario Arcana" : "Usuario Libre"}</strong>
-        {" – Tiradas restantes: "}{left}
+        {" – Tiradas restantes: "}{drawsLeft}
       </p>
       <p style={{ marginBottom:"1rem", opacity:0.8 }}>
         Próxima tirada en: {timeLeft}
@@ -197,26 +212,31 @@ export default function Home() {
 
       <button
         onClick={getReading}
-        disabled={left <= 0}
+        disabled={drawsLeft <= 0}
         style={{
-          padding:"1rem 2rem", fontSize:"1.25rem",
-          border:"none", borderRadius:"8px",
-          background:"#fff", color:"#333",
-          boxShadow:"0 4px 8px rgba(0,0,0,0.2)",
-          cursor:left>0?"pointer":"not-allowed",
-          opacity:left>0?1:0.5,
-          transition:"transform 0.2s"
+          padding:        "1rem 2rem",
+          fontSize:       "1.25rem",
+          border:         "none",
+          borderRadius:   "8px",
+          backgroundColor:"#fff",
+          color:          "#333",
+          boxShadow:      "0 4px 8px rgba(0,0,0,0.2)",
+          cursor:         drawsLeft>0 ? "pointer" : "not-allowed",
+          opacity:        drawsLeft>0 ? 1 : 0.5,
+          transition:     "transform 0.2s"
         }}
-        onMouseOver={e => left>0 && (e.currentTarget.style.transform="scale(1.05)")}
-        onMouseOut={e => e.currentTarget.style.transform="scale(1)"}
+        onMouseOver={e => drawsLeft>0 && (e.currentTarget.style.transform = "scale(1.05)")}
+        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
       >
         {loading ? "Leyendo..." : "Haz tu tirada"}
       </button>
 
       {reading && (
         <div style={{
-          marginTop:"2rem", padding:"1rem 2rem",
-          background:"rgba(200,200,200,0.2)", borderRadius:"8px"
+          marginTop:   "2rem",
+          padding:     "1rem 2rem",
+          background:  "rgba(200,200,200,0.2)",
+          borderRadius:"8px"
         }}>
           {reading}
         </div>
