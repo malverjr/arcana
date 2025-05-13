@@ -6,7 +6,7 @@ function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCDay(), 0, 1));
+  const yearStart = new Date(Date.UTC(date.getFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
@@ -159,7 +159,7 @@ export default function Home() {
 
       {/* GIF original con animación float */}
       <img
-        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+        src="/Art%20Glow%20GIF%20by%20xperimentaldesign.gif"
         alt="Animación Mística"
         style={{
           width:        '300px',
@@ -211,12 +211,9 @@ export default function Home() {
         Próxima tirada en: {timeLeft}
       </p>
 
+      {/* Botón sin animación down-and-up */}
       <button
-        onClick={e => {
-          e.currentTarget.style.animation = 'bounce 0.3s ease';
-          getReading();
-        }}
-        onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
+        onClick={getReading}
         disabled={drawsLeft <= 0 && !isAdmin}
         style={{
           padding:        '1rem 2rem',
@@ -230,6 +227,8 @@ export default function Home() {
           opacity:        drawsLeft>0 || isAdmin ? 1 : 0.5,
           transition:     'transform 0.2s'
         }}
+        onMouseOver={e => drawsLeft>0 && (e.currentTarget.style.transform = "scale(1.05)")}
+        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
       >
         {loading ? 'Leyendo…' : 'Haz tu tirada'}
       </button>
@@ -254,10 +253,6 @@ export default function Home() {
         @keyframes fadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
-        }
-        @keyframes bounce {
-          0%,100% { transform: scale(1); }
-          50%      { transform: scale(1.05); }
         }
       `}</style>
     </div>
