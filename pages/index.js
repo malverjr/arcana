@@ -11,12 +11,10 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  // Rol de usuario: "free", "premium", "admin"
   const userRole = 'premium';
   const isPremium = userRole === 'premium' || userRole === 'admin';
   const isAdmin   = userRole === 'admin';
 
-  // Temáticas y sus labels (solo para premium)
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
   const labels = {
     amor:      "Amor & Relaciones",
@@ -26,8 +24,6 @@ export default function Home() {
     destino:   "Propósito & Destino"
   };
   const [selected, setSelected] = useState(themes[0]);
-
-  // Estados de UI
   const [reading,  setReading]  = useState("");
   const [loading,  setLoading]  = useState(false);
   const [used,     setUsed]     = useState(0);
@@ -35,10 +31,8 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
 
-  // Máximo de tiradas según rol
   const maxDraws = isAdmin ? Infinity : isPremium ? 3 : 1;
 
-  // Clave del período actual
   const getPeriodKey = () => {
     const now = new Date();
     if (isPremium && !isAdmin) {
@@ -48,7 +42,6 @@ export default function Home() {
     return `${now.getFullYear()}-M${String(now.getMonth() + 1).padStart(2, '0')}`;
   };
 
-  // Fecha exacta del próximo reset
   const getNextResetDate = () => {
     const now = new Date();
     let nxt;
@@ -63,14 +56,12 @@ export default function Home() {
     return nxt;
   };
 
-  // Resetea el conteo de tiradas
   const resetPeriod = () => {
     localStorage.setItem("periodKey", getPeriodKey());
     localStorage.setItem("drawsUsed", "0");
     setUsed(0);
   };
 
-  // Init / schedule reset
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = localStorage.getItem("periodKey");
@@ -92,7 +83,6 @@ export default function Home() {
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
-  // Contador regresivo UI
   useEffect(() => {
     if (!nextReset) return;
     const iv = setInterval(() => {
@@ -110,7 +100,6 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [nextReset]);
 
-  // Solicita lectura y cuenta uso
   const getReading = async () => {
     if (used >= maxDraws) return;
     setLoading(true);
@@ -157,7 +146,6 @@ export default function Home() {
         Arcana
       </h1>
 
-      {/* GIF original con animación float */}
       <img
         src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
         alt="Animación Mística"
@@ -201,16 +189,13 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{
-        marginBottom:  '0.25rem',
-        letterSpacing: '0.02em',
-        fontSize:      '1rem'
-      }}>
+      <p style={{ marginBottom: '0.25rem', letterSpacing: '0.02em', fontSize: '1rem' }}>
         <strong>
           {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
         </strong>
         {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
       </p>
+
       <p style={{
         marginBottom:  '1rem',
         letterSpacing: '0.02em',
@@ -266,7 +251,38 @@ export default function Home() {
         }
         @keyframes bounce {
           0%,100% { transform: scale(1); }
-          50%      { transform: scale(1.05); }
+          50%     { transform: scale(1.05); }
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 600px) {
+          h1 {
+            font-size: 2rem !important;
+            text-align: center;
+          }
+
+          img {
+            width: 200px !important;
+            height: 200px !important;
+          }
+
+          button {
+            font-size: 1rem !important;
+            padding: 0.75rem 1.5rem !important;
+          }
+
+          p {
+            text-align: center;
+          }
+
+          div[style*="gap"] {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+          }
+
+          div[style*="padding: 1rem 2rem"] {
+            padding: 1rem !important;
+          }
         }
       `}</style>
     </div>
