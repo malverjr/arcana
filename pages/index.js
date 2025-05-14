@@ -6,7 +6,7 @@ function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCDay(), 0, 1));
+  const yearStart = new Date(Date.UTC(d.getFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
@@ -43,9 +43,9 @@ export default function Home() {
     const now = new Date();
     if (isPremium && !isAdmin) {
       const w = getWeekNumber(now);
-      return ${now.getFullYear()}-W${String(w).padStart(2,'0')};
+      return `${now.getFullYear()}-W${String(w).padStart(2,'0')}`;
     }
-    return ${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,'0')};
+    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,'0')}`;
   };
 
   // Fecha exacta del próximo reset
@@ -102,7 +102,7 @@ export default function Home() {
         const h = Math.floor((diff % 86400000) / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
-        setTimeLeft(${d}d ${h}h ${m}m ${s}s);
+        setTimeLeft(`${d}d ${h}h ${m}m ${s}s`);
       } else {
         setTimeLeft("0d 0h 0m 0s");
       }
@@ -117,8 +117,8 @@ export default function Home() {
     setReading("");
     try {
       const url = isPremium
-        ? /api/tarot?theme=${selected}
-        : /api/tarot;
+        ? `/api/tarot?theme=${selected}`
+        : `/api/tarot`;
       const res = await fetch(url);
       const { reading } = await res.json();
       setReading(reading);
@@ -144,7 +144,7 @@ export default function Home() {
       minHeight:      '100vh',
       background:     '#000',
       color:          '#fff',
-      fontFamily:     "SF Pro Text", BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, "Oxygen", Ubuntu, "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif,
+      fontFamily:     `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
       padding:        '2rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
@@ -152,7 +152,7 @@ export default function Home() {
       <h1 style={{
         fontSize:      '3rem',
         letterSpacing: '0.05em',
-        marginBottom:  '2rem'
+        marginBottom:  '1.5rem'
       }}>
         Arcana
       </h1>
@@ -164,36 +164,29 @@ export default function Home() {
         style={{
           width:        '300px',
           height:       '300px',
-          marginBottom: '2.5rem',
+          marginBottom: '2rem',
           objectFit:    'cover',
           animation:    'float 4s ease-in-out infinite'
         }}
       />
 
       {isPremium && !isAdmin && (
-        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'2rem' }}>
+        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'1.5rem' }}>
           {themes.map(t => (
             <button
               key={t}
               onClick={() => setSelected(t)}
               style={{
-                padding:     '0.5rem 1rem',
+                padding:     '1rem',
                 border:      '1px solid rgba(255,255,255,0.3)',
-                borderRadius:'4px',
-                background:  selected===t ? '#fff' : 'none',
-                color:       selected===t ? '#000' : '#fff',
+                borderRadius:'8px',
+                background:  'none',
+                color:       '#fff',
                 cursor:      'pointer',
-                transition:  'background 0.2s, color 0.2s'
+                transition:  'transform 0.2s'
               }}
-              onMouseOver={e => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = '#000';
-              }}
-              onMouseOut={e => {
-                if (selected === t) return;
-                e.currentTarget.style.background = 'none';
-                e.currentTarget.style.color = '#fff';
-              }}
+              onMouseOver={e => e.currentTarget.style.transform="scale(1.05)"}
+              onMouseOut={e => e.currentTarget.style.transform="scale(1)"}
             >
               {labels[t]}
             </button>
@@ -201,13 +194,22 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{ marginBottom:'0.5rem', letterSpacing:'0.02em', fontSize:'1rem' }}>
+      <p style={{
+        marginBottom:  '0.25rem',
+        letterSpacing: '0.02em',
+        fontSize:      '1rem'
+      }}>
         <strong>
           {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
         </strong>
         {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
       </p>
-      <p style={{ marginBottom:'2.5rem', letterSpacing:'0.02em', fontSize:'0.9rem', opacity:0.8 }}>
+      <p style={{
+        marginBottom:  '1rem',
+        letterSpacing: '0.02em',
+        fontSize:      '0.9rem',
+        opacity:       0.8
+      }}>
         Próxima tirada en: {timeLeft}
       </p>
 
@@ -246,7 +248,7 @@ export default function Home() {
         </div>
       )}
 
-      <style jsx global>{
+      <style jsx global>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50%      { transform: translateY(-10px); }
@@ -259,7 +261,7 @@ export default function Home() {
           0%,100% { transform: scale(1); }
           50%      { transform: scale(1.05); }
         }
-      }</style>
+      `}</style>
     </div>
   );
 }
