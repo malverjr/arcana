@@ -136,64 +136,24 @@ export default function Home() {
   const drawsLeft = maxDraws - used;
 
   return (
-    <div style={{
-      display:        'flex',
-      flexDirection:  'column',
-      alignItems:     'center',
-      justifyContent: 'center',
-      minHeight:      '100vh',
-      background:     '#000',
-      color:          '#fff',
-      fontFamily:     `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      padding:        '2rem 1rem'
-    }}>
+    <div className="container">
       <Head><title>Arcana</title></Head>
 
-      <h1 style={{
-        fontSize:      '3rem',
-        letterSpacing: '0.05em',
-        marginBottom:  '1.5rem'
-      }}>
-        Arcana
-      </h1>
+      <h1>Arcana</h1>
 
-      {/* GIF original con animación float */}
       <img
         src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
         alt="Animación Mística"
-        style={{
-          width:        '300px',
-          height:       '300px',
-          marginBottom: '2rem',
-          objectFit:    'cover',
-          animation:    'float 4s ease-in-out infinite'
-        }}
+        className="cube"
       />
 
       {isPremium && !isAdmin && (
-        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'1.5rem' }}>
+        <div className="themes">
           {themes.map(t => (
             <button
               key={t}
               onClick={() => setSelected(t)}
-              style={{
-                padding:     '0.5rem 1rem',
-                border:      '1px solid rgba(255,255,255,0.3)',
-                borderRadius:'4px',
-                background:  selected === t ? '#fff' : 'none',
-                color:       selected === t ? '#000' : '#fff',
-                cursor:      'pointer',
-                transition:  'background 0.2s, color 0.2s'
-              }}
-              onMouseOver={e => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = '#000';
-              }}
-              onMouseOut={e => {
-                if (selected === t) return;
-                e.currentTarget.style.background = 'none';
-                e.currentTarget.style.color = '#fff';
-              }}
+              className={selected === t ? 'theme-btn selected' : 'theme-btn'}
             >
               {labels[t]}
             </button>
@@ -201,72 +161,110 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{
-        marginBottom:  '0.25rem',
-        letterSpacing: '0.02em',
-        fontSize:      '1rem'
-      }}>
+      <p className="status">
         <strong>
           {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
         </strong>
         {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
       </p>
-      <p style={{
-        marginBottom:  '1rem',
-        letterSpacing: '0.02em',
-        fontSize:      '0.9rem',
-        opacity:       0.8
-      }}>
-        Próxima tirada en: {timeLeft}
-      </p>
+      <p className="timer">Próxima tirada en: {timeLeft}</p>
 
       <button
-        onClick={e => {
-          e.currentTarget.style.animation = 'bounce 0.3s ease';
-          getReading();
-        }}
-        onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
+        onClick={getReading}
         disabled={drawsLeft <= 0 && !isAdmin}
-        style={{
-          padding:        '1rem 2rem',
-          fontSize:       '1.25rem',
-          border:         'none',
-          borderRadius:   '8px',
-          backgroundColor:'#fff',
-          color:          '#333',
-          boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
-          cursor:         drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
-          opacity:        drawsLeft > 0 || isAdmin ? 1 : 0.5,
-          transition:     'transform 0.2s'
-        }}
+        className="draw-btn"
       >
         {loading ? 'Leyendo…' : 'Haz tu tirada'}
       </button>
 
-      {reading && (
-        <div style={{
-          marginTop:    '2rem',
-          padding:      '1rem 2rem',
-          background:   'rgba(200,200,200,0.2)',
-          borderRadius: '8px',
-          animation:    'fadeIn 0.5s ease'
-        }}>
-          {reading}
-        </div>
-      )}
+      {reading && <div className="reading">{reading}</div>}
 
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-10px); }
+      <style jsx>{`
+        .container {
+          max-width: 600px;
+          margin: auto;
+          padding: 2rem 1rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: #000;
+          color: #fff;
+          min-height: 100vh;
+          font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        h1 {
+          font-size: 3rem;
+          letter-spacing: .05em;
+          margin-bottom: 1.5rem;
+        }
+        .cube {
+          width: 80%;
+          max-width: 300px;
+          margin-bottom: 2rem;
+          object-fit: cover;
+        }
+        .themes {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+          justify-content: center;
+        }
+        .theme-btn {
+          padding: 0.5rem 1rem;
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 4px;
+          background: none;
+          color: #fff;
+          cursor: pointer;
+          transition: background .2s, color .2s;
+        }
+        .theme-btn:hover {
+          background: rgba(255,255,255,0.15);
+        }
+        .selected {
+          background: rgba(255,255,255,0.15);
+          border-color: #fff;
+          text-decoration: underline;
+        }
+        .status {
+          letter-spacing: .02em;
+          font-size: 1rem;
+          margin-bottom: 0.25rem;
+        }
+        .timer {
+          font-size: .9rem;
+          opacity: .8;
+          margin-bottom: 1rem;
+        }
+        .draw-btn {
+          padding: 1rem 2rem;
+          font-size: 1.25rem;
+          border: none;
+          border-radius: 8px;
+          background-color: #fff;
+          color: #333;
+          cursor: pointer;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          opacity: ${drawsLeft > 0 || isAdmin ? 1 : 0.5};
+        }
+        .draw-btn:disabled {
+          cursor: not-allowed;
+        }
+        .reading {
+          margin-top: 2rem;
+          padding: 1rem 2rem;
+          background: rgba(200,200,200,0.2);
+          border-radius: 8px;
+          animation: fadeIn .5s ease;
         }
         @keyframes fadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
-        @keyframes bounce {
-          0%,100% { transform: scale(1); }
-          50%      { transform: scale(1.05); }
+        @media (max-width: 480px) {
+          h1 { font-size: 2.5rem; }
+          .draw-btn { width: 100%; }
         }
       `}</style>
     </div>
