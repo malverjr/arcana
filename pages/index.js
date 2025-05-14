@@ -6,7 +6,7 @@ function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getFullYear(), 0, 1));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
@@ -43,9 +43,9 @@ export default function Home() {
     const now = new Date();
     if (isPremium && !isAdmin) {
       const w = getWeekNumber(now);
-      return `${now.getFullYear()}-W${String(w).padStart(2,'0')}`;
+      return `${now.getFullYear()}-W${String(w).padStart(2, '0')}`;
     }
-    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,'0')}`;
+    return `${now.getFullYear()}-M${String(now.getMonth() + 1).padStart(2, '0')}`;
   };
 
   // Fecha exacta del próximo reset
@@ -59,7 +59,7 @@ export default function Home() {
     } else {
       nxt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
-    nxt.setHours(0,0,0,0);
+    nxt.setHours(0, 0, 0, 0);
     return nxt;
   };
 
@@ -177,16 +177,23 @@ export default function Home() {
               key={t}
               onClick={() => setSelected(t)}
               style={{
-                padding:     '1rem',
+                padding:     '0.5rem 1rem',
                 border:      '1px solid rgba(255,255,255,0.3)',
-                borderRadius:'8px',
-                background:  'none',
-                color:       '#fff',
+                borderRadius:'4px',
+                background:  selected === t ? '#fff' : 'none',
+                color:       selected === t ? '#000' : '#fff',
                 cursor:      'pointer',
-                transition:  'transform 0.2s'
+                transition:  'background 0.2s, color 0.2s'
               }}
-              onMouseOver={e => e.currentTarget.style.transform="scale(1.05)"}
-              onMouseOut={e => e.currentTarget.style.transform="scale(1)"}
+              onMouseOver={e => {
+                e.currentTarget.style.background = '#fff';
+                e.currentTarget.style.color = '#000';
+              }}
+              onMouseOut={e => {
+                if (selected === t) return;
+                e.currentTarget.style.background = 'none';
+                e.currentTarget.style.color = '#fff';
+              }}
             >
               {labels[t]}
             </button>
@@ -228,8 +235,8 @@ export default function Home() {
           backgroundColor:'#fff',
           color:          '#333',
           boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
-          cursor:         drawsLeft>0 || isAdmin ? 'pointer' : 'not-allowed',
-          opacity:        drawsLeft>0 || isAdmin ? 1 : 0.5,
+          cursor:         drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
+          opacity:        drawsLeft > 0 || isAdmin ? 1 : 0.5,
           transition:     'transform 0.2s'
         }}
       >
