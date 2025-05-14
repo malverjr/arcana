@@ -6,7 +6,7 @@ function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCDay(), 0, 1));
+  const yearStart = new Date(Date.UTC(date.getFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
@@ -144,120 +144,130 @@ export default function Home() {
       minHeight:      '100vh',
       background:     '#000',
       color:          '#fff',
-      fontFamily:     `"SF Pro Text", BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, "Oxygen", Ubuntu, "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif`,
+      fontFamily:     `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+      fontSize:       '1.125rem',       // base un poco más grande
       padding:        '2rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
 
-      <h1 style={{
-        fontSize:      '3rem',
-        letterSpacing: '0.05em',
-        marginBottom:  '2rem'
-      }}>
-        Arcana
-      </h1>
-
-      {/* GIF original con animación float */}
-      <img
-        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
-        alt="Animación Mística"
-        style={{
-          width:        '300px',
-          height:       '300px',
-          marginBottom: '2.5rem',
-          objectFit:    'cover',
-          animation:    'float 4s ease-in-out infinite'
-        }}
-      />
-
-      {isPremium && !isAdmin && (
-        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'2rem' }}>
-          {themes.map(t => (
-            <button
-              key={t}
-              onClick={() => setSelected(t)}
-              style={{
-                padding:     '0.5rem 1rem',
-                border:      '1px solid rgba(255,255,255,0.3)',
-                borderRadius:'4px',
-                background:  selected===t ? '#fff' : 'none',
-                color:       selected===t ? '#000' : '#fff',
-                cursor:      'pointer',
-                transition:  'background 0.2s, color 0.2s'
-              }}
-              onMouseOver={e => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = '#000';
-              }}
-              onMouseOut={e => {
-                if (selected === t) return;
-                e.currentTarget.style.background = 'none';
-                e.currentTarget.style.color = '#fff';
-              }}
-            >
-              {labels[t]}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <p style={{ marginBottom:'0.5rem', letterSpacing:'0.02em', fontSize:'1rem' }}>
-        <strong>
-          {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
-        </strong>
-        {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
-      </p>
-      <p style={{ marginBottom:'2.5rem', letterSpacing:'0.02em', fontSize:'0.9rem', opacity:0.8 }}>
-        Próxima tirada en: {timeLeft}
-      </p>
-
-      <button
-        onClick={e => {
-          e.currentTarget.style.animation = 'bounce 0.3s ease';
-          getReading();
-        }}
-        onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
-        disabled={drawsLeft <= 0 && !isAdmin}
-        style={{
-          padding:        '1rem 2rem',
-          fontSize:       '1.25rem',
-          border:         'none',
-          borderRadius:   '8px',
-          backgroundColor:'#fff',
-          color:          '#333',
-          boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
-          cursor:         drawsLeft>0 || isAdmin ? 'pointer' : 'not-allowed',
-          opacity:        drawsLeft>0 || isAdmin ? 1 : 0.5,
-          transition:     'transform 0.2s'
-        }}
-      >
-        {loading ? 'Leyendo…' : 'Haz tu tirada'}
-      </button>
-
-      {reading && (
-        <div style={{
-          marginTop:    '2rem',
-          padding:      '1rem 2rem',
-          background:   'rgba(200,200,200,0.2)',
-          borderRadius: '8px',
-          animation:    'fadeIn 0.5s ease'
+      <div style={{ maxWidth: 600, width: '100%', textAlign: 'center' }}>
+        <h1 style={{
+          fontSize:      '2.5rem',       // h1 más pequeño
+          fontWeight:    600,            // semibold
+          letterSpacing: '0.05em',
+          marginBottom:  '2rem'
         }}>
-          {reading}
-        </div>
-      )}
+          Arcana
+        </h1>
+
+        {/* más breathing-room y sin float */}
+        <img
+          src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+          alt="Animación Mística"
+          style={{
+            width:        '300px',
+            height:       '300px',
+            marginBottom: '4rem',       // espacio aumentado
+            objectFit:    'cover'
+          }}
+        />
+
+        {isPremium && !isAdmin && (
+          <div style={{ display:'flex', gap:'0.5rem', marginBottom:'4rem' }}>
+            {themes.map(t => (
+              <button
+                key={t}
+                onClick={() => setSelected(t)}
+                style={{
+                  padding:       '0.5rem 1rem',
+                  border:        '2px solid rgba(255,255,255,0.5)',  // 2px, 0.5 opacidad
+                  borderRadius:  '4px',
+                  background:    selected===t
+                    ? 'rgba(255,255,255,0.15)'  // semitransparente
+                    : 'transparent',
+                  color:         '#fff',
+                  cursor:        'pointer',
+                  transition:    'border-color 0.2s, background 0.2s'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,1)';
+                }}
+                onMouseOut={e => {
+                  if (selected !== t) {
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)';
+                  }
+                }}
+              >
+                <span
+                  style={{
+                    borderBottom: selected===t ? '2px solid #fff' : 'none'
+                  }}
+                >
+                  {labels[t]}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <p style={{
+          marginBottom:  '0.5rem',
+          letterSpacing: '0.02em',
+          fontSize:      '1rem',
+          fontWeight:    300            // extra-light
+        }}>
+          <strong>
+            {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
+          </strong>
+          {' — Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
+        </p>
+        <p style={{
+          marginBottom:  '2.5rem',
+          letterSpacing: '0.02em',
+          fontSize:      '0.9rem',
+          fontWeight:    300,           // extra-light
+          opacity:       0.8
+        }}>
+          Próxima tirada en: {timeLeft}
+        </p>
+
+        <button
+          onClick={getReading}
+          disabled={drawsLeft <= 0 && !isAdmin}
+          style={{
+            padding:        '1rem 2rem',
+            fontSize:       '1.25rem',
+            border:         'none',
+            borderRadius:   '8px',
+            backgroundColor:'#fff',
+            color:          '#333',
+            boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
+            cursor:         drawsLeft>0 || isAdmin ? 'pointer' : 'not-allowed',
+            opacity:        drawsLeft>0 || isAdmin ? 1 : 0.5,
+            transition:     'transform 0.2s'
+          }}
+          onMouseOver={e => drawsLeft>0 && (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
+        >
+          {loading ? 'Leyendo…' : 'Haz tu tirada'}
+        </button>
+
+        {reading && (
+          <div style={{
+            marginTop:    '2rem',
+            padding:      '1rem 2rem',
+            background:   'rgba(200,200,200,0.2)',
+            borderRadius: '8px'
+          }}>
+            {reading}
+          </div>
+        )}
+      </div>
 
       <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-10px); }
-        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
-        }
-        @keyframes bounce {
-          0%,100% { transform: scale(1); }
-          50%      { transform: scale(1.05); }
         }
       `}</style>
     </div>
