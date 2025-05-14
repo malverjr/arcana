@@ -3,11 +3,7 @@ import Head from 'next/head';
 
 // Calcula el número de semana ISO del año
 function getWeekNumber(date) {
-  const d = new Date(Date.UTC(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate()
-  ));
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
@@ -15,10 +11,12 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'premium'; // "free", "premium" o "admin"
+  // Rol de usuario: "free", "premium", "admin"
+  const userRole = 'premium';
   const isPremium = userRole === 'premium' || userRole === 'admin';
   const isAdmin   = userRole === 'admin';
 
+  // Temáticas y sus labels (solo para premium)
   const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
   const labels = {
     amor:      "Amor & Relaciones",
@@ -29,6 +27,7 @@ export default function Home() {
   };
   const [selected, setSelected] = useState(themes[0]);
 
+  // Estados de UI
   const [reading,  setReading]  = useState("");
   const [loading,  setLoading]  = useState(false);
   const [used,     setUsed]     = useState(0);
@@ -36,17 +35,20 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
 
+  // Máximo de tiradas según rol
   const maxDraws = isAdmin ? Infinity : isPremium ? 3 : 1;
 
+  // Clave del período actual
   const getPeriodKey = () => {
     const now = new Date();
     if (isPremium && !isAdmin) {
       const w = getWeekNumber(now);
-      return `${now.getFullYear()}-W${String(w).padStart(2,'0')}`;
+      return `${now.getFullYear()}-W${String(w).padStart(2, '0')}`;
     }
-    return `${now.getFullYear()}-M${String(now.getMonth()+1).padStart(2,'0')}`;
+    return `${now.getFullYear()}-M${String(now.getMonth() + 1).padStart(2, '0')}`;
   };
 
+  // Fecha exacta del próximo reset
   const getNextResetDate = () => {
     const now = new Date();
     let nxt;
@@ -55,18 +57,20 @@ export default function Home() {
       nxt = new Date(now);
       nxt.setDate(now.getDate() + daysToMonday);
     } else {
-      nxt = new Date(now.getFullYear(), now.getMonth()+1, 1);
+      nxt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
-    nxt.setHours(0,0,0,0);
+    nxt.setHours(0, 0, 0, 0);
     return nxt;
   };
 
+  // Resetea el conteo de tiradas
   const resetPeriod = () => {
     localStorage.setItem("periodKey", getPeriodKey());
     localStorage.setItem("drawsUsed", "0");
     setUsed(0);
   };
 
+  // Init / schedule reset
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = localStorage.getItem("periodKey");
@@ -88,6 +92,7 @@ export default function Home() {
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
+  // Contador regresivo UI
   useEffect(() => {
     if (!nextReset) return;
     const iv = setInterval(() => {
@@ -105,8 +110,9 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [nextReset]);
 
+  // Solicita lectura y cuenta uso
   const getReading = async () => {
-    if (used >= maxDraws && !isAdmin) return;
+    if (used >= maxDraws) return;
     setLoading(true);
     setReading("");
     try {
@@ -130,23 +136,64 @@ export default function Home() {
   const drawsLeft = maxDraws - used;
 
   return (
-    <div className="container">
+    <div style={{
+      display:        'flex',
+      flexDirection:  'column',
+      alignItems:     'center',
+      justifyContent: 'center',
+      minHeight:      '100vh',
+      background:     '#000',
+      color:          '#fff',
+      fontFamily:     `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+      padding:        '2rem 1rem'
+    }}>
       <Head><title>Arcana</title></Head>
 
-      <h1>Arcana</h1>
+      <h1 style={{
+        fontSize:      '3rem',
+        letterSpacing: '0.05em',
+        marginBottom:  '1.5rem'
+      }}>
+        Arcana
+      </h1>
 
+      {/* GIF original con animación float */}
       <img
-        src="/Art Glow GIF by xponentialdesign.gif"
+        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
         alt="Animación Mística"
+        style={{
+          width:        '300px',
+          height:       '300px',
+          marginBottom: '2rem',
+          objectFit:    'cover',
+          animation:    'float 4s ease-in-out infinite'
+        }}
       />
 
       {isPremium && !isAdmin && (
-        <div className="themes">
+        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'1.5rem' }}>
           {themes.map(t => (
             <button
               key={t}
               onClick={() => setSelected(t)}
-              className={selected===t ? 'selected' : ''}
+              style={{
+                padding:     '0.5rem 1rem',
+                border:      '1px solid rgba(255,255,255,0.3)',
+                borderRadius:'4px',
+                background:  selected === t ? '#fff' : 'none',
+                color:       selected === t ? '#000' : '#fff',
+                cursor:      'pointer',
+                transition:  'background 0.2s, color 0.2s'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = '#fff';
+                e.currentTarget.style.color = '#000';
+              }}
+              onMouseOut={e => {
+                if (selected === t) return;
+                e.currentTarget.style.background = 'none';
+                e.currentTarget.style.color = '#fff';
+              }}
             >
               {labels[t]}
             </button>
@@ -154,103 +201,72 @@ export default function Home() {
         </div>
       )}
 
-      <p className="status">
+      <p style={{
+        marginBottom:  '0.25rem',
+        letterSpacing: '0.02em',
+        fontSize:      '1rem'
+      }}>
         <strong>
           {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
         </strong>
         {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
       </p>
-      <p className="status">
+      <p style={{
+        marginBottom:  '1rem',
+        letterSpacing: '0.02em',
+        fontSize:      '0.9rem',
+        opacity:       0.8
+      }}>
         Próxima tirada en: {timeLeft}
       </p>
 
       <button
-        onClick={getReading}
-        disabled={drawsLeft<=0 && !isAdmin}
-        className="draw-btn"
+        onClick={e => {
+          e.currentTarget.style.animation = 'bounce 0.3s ease';
+          getReading();
+        }}
+        onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
+        disabled={drawsLeft <= 0 && !isAdmin}
+        style={{
+          padding:        '1rem 2rem',
+          fontSize:       '1.25rem',
+          border:         'none',
+          borderRadius:   '8px',
+          backgroundColor:'#fff',
+          color:          '#333',
+          boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
+          cursor:         drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
+          opacity:        drawsLeft > 0 || isAdmin ? 1 : 0.5,
+          transition:     'transform 0.2s'
+        }}
       >
         {loading ? 'Leyendo…' : 'Haz tu tirada'}
       </button>
 
       {reading && (
-        <div className="result">{reading}</div>
+        <div style={{
+          marginTop:    '2rem',
+          padding:      '1rem 2rem',
+          background:   'rgba(200,200,200,0.2)',
+          borderRadius: '8px',
+          animation:    'fadeIn 0.5s ease'
+        }}>
+          {reading}
+        </div>
       )}
 
-      <style jsx>{`
-        .container {
-          max-width: 480px;
-          width: 100%;
-          margin: 0 auto;
-          padding: 2rem 1rem;
-          text-align: center;
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-10px); }
         }
-        h1 {
-          font-size: 2.5rem;
-          margin-bottom: 1.5rem;
-          color: #fff;
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        img {
-          width: 100%;
-          max-width: 300px;
-          height: auto;
-          margin-bottom: 2rem;
-        }
-        .themes {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 0.5rem;
-          margin-bottom: 2rem;
-        }
-        .themes button {
-          padding: 0.5rem 1rem;
-          border: 1px solid rgba(255,255,255,0.3);
-          border-radius: 4px;
-          background: none;
-          color: #fff;
-          cursor: pointer;
-          transition: background 0.2s, color 0.2s;
-        }
-        .themes button:hover {
-          background: #fff;
-          color: #000;
-        }
-        .themes button.selected {
-          background: #fff;
-          color: #000;
-        }
-        .status {
-          margin: 0.25rem 0;
-          color: #fff;
-          font-size: 1rem;
-        }
-        .draw-btn {
-          margin: 2rem 0;
-          padding: 1rem 2rem;
-          font-size: 1.25rem;
-          border: none;
-          border-radius: 8px;
-          background: #fff;
-          color: #333;
-          cursor: pointer;
-          transition: transform 0.2s;
-        }
-        .draw-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .result {
-          margin-top: 1rem;
-          padding: 1rem;
-          background: rgba(255,255,255,0.1);
-          border-radius: 8px;
-          color: #fff;
-        }
-
-        @media (max-width: 500px) {
-          h1 { font-size: 2rem; }
-          .themes button { flex: 1 1 45%; }
-          .draw-btn { width: 100%; }
+        @keyframes bounce {
+          0%,100% { transform: scale(1); }
+          50%      { transform: scale(1.05); }
         }
       `}</style>
     </div>
