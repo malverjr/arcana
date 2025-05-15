@@ -10,7 +10,7 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'admin'; // Cambiar según usuario actual
+  const userRole = 'arcana+';
 
   const isNormal      = userRole === 'normal';
   const isArcana      = userRole === 'arcana';
@@ -208,7 +208,7 @@ export default function Home() {
             ))}
           </div>
           {themes.length > 5 && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
               {themes.slice(5).map(t => (
                 <button
                   key={t}
@@ -288,9 +288,11 @@ export default function Home() {
           padding: '1rem 2rem',
           background: 'rgba(200,200,200,0.2)',
           borderRadius: '8px',
-          animation: 'fadeIn 0.5s ease'
+          animation: 'fadeIn 0.5s ease',
+          maxWidth: '90vw',
+          textAlign: 'center'
         }}>
-          {reading}
+          <span className="animated-reading">{reading}</span>
         </div>
       )}
 
@@ -299,9 +301,26 @@ export default function Home() {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
+
         @keyframes bounce {
           0%,100% { transform: scale(1); }
           50%     { transform: scale(1.05); }
+        }
+
+        .animated-reading {
+          background: linear-gradient(90deg, #ffffff, #5bb6ff, #ffffff);
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: shineText 3s ease-in-out infinite;
+        }
+
+        @keyframes shineText {
+          0% { background-position: 0% center; }
+          50% { background-position: 100% center; }
+          100% { background-position: 0% center; }
         }
 
         @media (max-width: 600px) {
