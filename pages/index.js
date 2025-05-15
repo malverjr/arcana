@@ -308,18 +308,18 @@ export default function Home() {
         }
 
         .animated-reading {
-          background: linear-gradient(90deg, #ffffff, #5bb6ff, #ffffff);
+          background: linear-gradient(90deg, #ffffff, #aacdee, #ffffff);
           background-size: 200% auto;
           background-clip: text;
           -webkit-background-clip: text;
           color: transparent;
           -webkit-text-fill-color: transparent;
-          animation: shineText 3s ease-in-out infinite;
+          animation: shineText 6s ease-in-out infinite;
         }
 
         @keyframes shineText {
-          0% { background-position: 0% center; }
-          50% { background-position: 100% center; }
+          0%   { background-position: 0% center; }
+          50%  { background-position: 100% center; }
           100% { background-position: 0% center; }
         }
 
@@ -328,26 +328,21 @@ export default function Home() {
             font-size: 2rem !important;
             text-align: center;
           }
-
           img {
             width: 200px !important;
             height: 200px !important;
           }
-
           button {
             font-size: 1rem !important;
             padding: 0.75rem 1.5rem !important;
           }
-
           p {
             text-align: center;
           }
-
           div[style*="gap"] {
             flex-direction: column !important;
             gap: 0.75rem !important;
           }
-
           div[style*="padding: 1rem 2rem"] {
             padding: 1rem !important;
           }
