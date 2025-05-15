@@ -308,7 +308,7 @@ export default function Home() {
         }
 
         .animated-reading {
-          background: linear-gradient(90deg, #ffffff, #fffee7, #ffffff);
+          background: linear-gradient(90deg, #ffffff, #fafe75, #ffffff);
           background-size: 200% auto;
           background-clip: text;
           -webkit-background-clip: text;
