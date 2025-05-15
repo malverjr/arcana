@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { Menu, X } from 'lucide-react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -13,10 +12,10 @@ function getWeekNumber(date) {
 
 export default function Home() {
   const userRole = 'arcana+';
-  const isNormal      = userRole === 'normal';
-  const isArcana      = userRole === 'arcana';
-  const isArcanaPlus  = userRole === 'arcana+';
-  const isAdmin       = userRole === 'admin';
+  const isNormal = userRole === 'normal';
+  const isArcana = userRole === 'arcana';
+  const isArcanaPlus = userRole === 'arcana+';
+  const isAdmin = userRole === 'admin';
 
   const themes = [
     ...(isArcana || isArcanaPlus || isAdmin ? [
@@ -28,16 +27,16 @@ export default function Home() {
   ];
 
   const labels = {
-    amor:        "Amor & Relaciones",
-    carrera:     "Carrera & Abundancia",
-    sombra:      "Sombra & Transformación",
-    intuicion:   "Intuición & Misterio",
-    destino:     "Propósito & Destino",
+    amor: "Amor & Relaciones",
+    carrera: "Carrera & Abundancia",
+    sombra: "Sombra & Transformación",
+    intuicion: "Intuición & Misterio",
+    destino: "Propósito & Destino",
     crecimiento: "Crecimiento Personal",
-    salud:       "Salud & Bienestar",
-    pasado:      "Pasado",
-    presente:    "Presente",
-    futuro:      "Futuro / Potencial"
+    salud: "Salud & Bienestar",
+    pasado: "Pasado",
+    presente: "Presente",
+    futuro: "Futuro / Potencial"
   };
 
   const colors = {
@@ -176,10 +175,12 @@ export default function Home() {
   const drawsLeft = maxDraws - used;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      minHeight: '100vh', background: '#000', color: '#fff',
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', minHeight: '100vh',
+      background: '#000', color: '#fff', padding: '2rem 1rem 3rem 1rem',
       fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      padding: '2rem 1rem 3rem 1rem', position: 'relative'
+      position: 'relative'
     }}>
       <Head><title>Arcana</title></Head>
 
@@ -212,100 +213,97 @@ export default function Home() {
         </div>
       )}
 
-{showMap ? (
-  <div style={{ textAlign: 'center', marginTop: '4rem', width: '100%' }}>
-    <h2 style={{ fontSize: '2rem', marginBottom: '2rem', letterSpacing: '0.05em' }}>Mapa sentimental</h2>
-
-    <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-      <svg viewBox="0 0 200 200" width="100%" height="auto">
-        {chartData.length === 0 && (
-          <text x="50%" y="50%" fill="#888" fontSize="12" textAnchor="middle" alignmentBaseline="middle">
-            Aún no hay tiradas
-          </text>
-        )}
-
-        {chartData.length > 0 && (() => {
-          const total = chartData.reduce((acc, d) => acc + d.value, 0);
-          let angle = 0;
-
-          return chartData.map((d, i) => {
-            const portion = d.value / total;
-            const [x1, y1] = [
-              100 + 100 * Math.cos(2 * Math.PI * angle),
-              100 + 100 * Math.sin(2 * Math.PI * angle)
-            ];
-            angle += portion;
-            const [x2, y2] = [
-              100 + 100 * Math.cos(2 * Math.PI * angle),
-              100 + 100 * Math.sin(2 * Math.PI * angle)
-            ];
-            const largeArc = portion > 0.5 ? 1 : 0;
-
-            return (
-              <path
-                key={i}
-                d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc} 1 ${x2},${y2} Z`}
-                fill={d.color}
-                style={{ transition: 'all 0.4s ease' }}
-                opacity={0.85}
-              />
-            );
-          });
-        })()}
-      </svg>
-    </div>
-
-    <button onClick={handleCloseMap} style={{
-      marginTop: '2rem',
-      padding: '0.6rem 1.2rem',
-      background: '#fff',
-      color: '#000',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontSize: '1rem'
-    }}>
-      Volver
-    </button>
-  </div>
-) : (
-
+      {showMap ? (
+        <div style={{ textAlign: 'center', marginTop: '4rem', width: '100%' }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '2rem', letterSpacing: '0.05em' }}>Mapa sentimental</h2>
+          <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+            <svg viewBox="0 0 200 200" width="100%" height="auto">
+              {chartData.length === 0 && (
+                <text x="50%" y="50%" fill="#888" fontSize="12" textAnchor="middle" alignmentBaseline="middle">
+                  Aún no hay tiradas
+                </text>
+              )}
+              {chartData.length > 0 && (() => {
+                const total = chartData.reduce((acc, d) => acc + d.value, 0);
+                let angle = 0;
+                return chartData.map((d, i) => {
+                  const portion = d.value / total;
+                  const [x1, y1] = [
+                    100 + 100 * Math.cos(2 * Math.PI * angle),
+                    100 + 100 * Math.sin(2 * Math.PI * angle)
+                  ];
+                  angle += portion;
+                  const [x2, y2] = [
+                    100 + 100 * Math.cos(2 * Math.PI * angle),
+                    100 + 100 * Math.sin(2 * Math.PI * angle)
+                  ];
+                  const largeArc = portion > 0.5 ? 1 : 0;
+                  return (
+                    <path
+                      key={i}
+                      d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc} 1 ${x2},${y2} Z`}
+                      fill={d.color}
+                      style={{ transition: 'all 0.4s ease' }}
+                      opacity={0.9}
+                    />
+                  );
+                });
+              })()}
+            </svg>
+          </div>
+          <button onClick={handleCloseMap} style={{
+            marginTop: '2rem', padding: '0.6rem 1.2rem',
+            background: '#fff', color: '#000',
+            borderRadius: '8px', cursor: 'pointer', fontSize: '1rem'
+          }}>Volver</button>
+        </div>
+      ) : (
         <>
           <h1 style={{ fontSize: '3rem', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Arcana</h1>
-
-          <img src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif" alt="Animación Mística"
+          <img
+            src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+            alt="Animación Mística"
             style={{ width: '300px', height: '300px', marginBottom: '2rem', objectFit: 'cover' }}
           />
-
-          {(isArcana || isArcanaPlus || isAdmin) && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {themes.slice(0, 5).map(t => (
-                  <button key={t} onClick={() => setSelected(t)} style={{
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            gap: '0.5rem', marginBottom: '1.5rem'
+          }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {themes.slice(0, 5).map(t => (
+                <button
+                  key={t} onClick={() => setSelected(t)}
+                  style={{
                     padding: '0.5rem 1rem',
                     border: '1px solid rgba(255,255,255,0.3)',
                     borderRadius: '4px',
                     background: selected === t ? '#fff' : 'none',
                     color: selected === t ? '#000' : '#fff',
                     cursor: 'pointer'
-                  }}>{labels[t]}</button>
-                ))}
-              </div>
-              {themes.length > 5 && (
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {themes.slice(5).map(t => (
-                    <button key={t} onClick={() => setSelected(t)} style={{
+                  }}>
+                  {labels[t]}
+                </button>
+              ))}
+            </div>
+            {themes.length > 5 && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {themes.slice(5).map(t => (
+                  <button
+                    key={t} onClick={() => setSelected(t)}
+                    style={{
                       padding: '0.5rem 1rem',
                       border: '1px solid rgba(255,255,255,0.3)',
                       borderRadius: '4px',
                       background: selected === t ? '#fff' : 'none',
                       color: selected === t ? '#000' : '#fff',
                       cursor: 'pointer'
-                    }}>{labels[t]}</button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                    }}>
+                    {labels[t]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <p style={{ marginBottom: '0.25rem' }}>
             <strong>{isAdmin ? 'Administrador' : isArcanaPlus ? 'Usuario Arcana+' : isArcana ? 'Usuario Arcana' : 'Usuario Libre'}</strong>
@@ -327,15 +325,11 @@ export default function Home() {
 
           {reading && (
             <div style={{
-              marginTop: '2rem',
-              padding: '1rem 2rem',
-              background: 'rgba(200,200,200,0.2)',
-              borderRadius: '8px',
-              animation: 'fadeIn 0.5s ease',
-              maxWidth: '90vw',
-              textAlign: 'center'
+              marginTop: '2rem', padding: '1rem 2rem',
+              background: 'rgba(200,200,200,0.2)', borderRadius: '8px',
+              animation: 'fadeIn 0.5s ease', maxWidth: '90vw', textAlign: 'center'
             }}>
-              <span className="animated-reading">{reading}</span>
+              <span>{reading}</span>
             </div>
           )}
         </>
