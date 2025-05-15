@@ -10,7 +10,7 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'arcana+'; // Cambiar según usuario actual
+  const userRole = 'admin'; // Cambiar según usuario actual
 
   const isNormal      = userRole === 'normal';
   const isArcana      = userRole === 'arcana';
