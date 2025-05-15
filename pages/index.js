@@ -308,13 +308,13 @@ export default function Home() {
         }
 
         .animated-reading {
-          background: linear-gradient(90deg, #ffffff, #fafe75, #ffffff);
-          background-size: 200% auto;
+          background: linear-gradient(90deg, #ffffff, #5bb6ff, #3a4eff, #5bb6ff, #ffffff);
+          background-size: 300% auto;
           background-clip: text;
           -webkit-background-clip: text;
           color: transparent;
           -webkit-text-fill-color: transparent;
-          animation: shineText 6s ease-in-out infinite;
+          animation: shineText 8s ease-in-out infinite;
         }
 
         @keyframes shineText {
