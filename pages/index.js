@@ -221,7 +221,7 @@ export default function Home() {
       <svg viewBox="0 0 200 200" width="100%" height="auto">
         <defs>
           <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#000" flood-opacity="0.5" />
+            <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#000" floodOpacity="0.5" />
           </filter>
           <radialGradient id="grad0" cx="50%" cy="50%" r="80%">
             <stop offset="0%" stopColor="#fff0" />
@@ -249,37 +249,120 @@ export default function Home() {
           </radialGradient>
         </defs>
 
-        <path d="M180.00,100.00 A80,80 0 0 1 161.28,151.42
-           L134.47,128.93 A45,45 0 0 0 145.00,100.00 Z"
-          fill="url(#grad0)" filter="url(#shadow)"
-          style="transform-origin: 100px 100px; animation: fanIn 0.8s ease-out forwards; animation-delay: 0s; opacity: 0;" />
-        <path d="M161.28,151.42 A80,80 0 0 1 91.64,179.56
-           L95.30,144.75 A45,45 0 0 0 134.47,128.93 Z"
-          fill="url(#grad1)" filter="url(#shadow)"
-          style="transform-origin: 100px 100px; animation: fanIn 0.8s ease-out forwards; animation-delay: 0.2s; opacity: 0;" />
-        <path d="M91.64,179.56 A80,80 0 0 1 23.10,122.05
-           L56.74,112.40 A45,45 0 0 0 95.30,144.75 Z"
-          fill="url(#grad2)" filter="url(#shadow)"
-          style="transform-origin: 100px 100px; animation: fanIn 0.8s ease-out forwards; animation-delay: 0.4s; opacity: 0;" />
-        <path d="M23.10,122.05 A80,80 0 0 1 43.88,34.55
-           L66.99,63.35 A45,45 0 0 0 56.74,112.40 Z"
-          fill="url(#grad3)" filter="url(#shadow)"
-          style="transform-origin: 100px 100px; animation: fanIn 0.8s ease-out forwards; animation-delay: 0.6s; opacity: 0;" />
-        <path d="M43.88,34.55 A80,80 0 0 1 136.12,34.55
-           L118.78,62.63 A45,45 0 0 0 66.99,63.35 Z"
-          fill="url(#grad4)" filter="url(#shadow)"
-          style="transform-origin: 100px 100px; animation: fanIn 0.8s ease-out forwards; animation-delay: 0.8s; opacity: 0;" />
-        <path d="M136.12,34.55 A80,80 0 0 1 180.00,100.00
-           L145.00,100.00 A45,45 0 0 0 118.78,62.63 Z"
-          fill="url(#grad5)" filter="url(#shadow)"
-          style="transform-origin: 100px 100px; animation: fanIn 0.8s ease-out forwards; animation-delay: 1.0s; opacity: 0;" />
+        {/* Sectores y textos aquí */}
+        <path
+          d="M180.00,100.00 A80,80 0 0 1 161.28,151.42 L134.47,128.93 A45,45 0 0 0 145.00,100.00 Z"
+          fill="url(#grad0)"
+          filter="url(#shadow)"
+          style={{
+            transformOrigin: '100px 100px',
+            animation: 'fanIn 0.8s ease-out forwards',
+            animationDelay: '0s',
+            opacity: 0
+          }}
+        />
+        <text x={155} y={118} textAnchor="middle" alignmentBaseline="middle" fill="#ffffff" fontSize={10}
+          style={{
+            animation: 'fadeIn 0.8s ease-out forwards',
+            animationDelay: '0.3s'
+          }}>
+          10%
+        </text>
 
-        <text x="155" y="118" textAnchor="middle" alignmentBaseline="middle" fill="white" fontSize="10" style="animation: fadeIn 0.8s ease-out forwards; animation-delay: 0.3s;">10%</text>
-        <text x="123" y="157" textAnchor="middle" alignmentBaseline="middle" fill="white" fontSize="10" style="animation: fadeIn 0.8s ease-out forwards; animation-delay: 0.5s;">14%</text>
-        <text x="62" y="155" textAnchor="middle" alignmentBaseline="middle" fill="white" fontSize="10" style="animation: fadeIn 0.8s ease-out forwards; animation-delay: 0.7s;">17%</text>
-        <text x="42" y="95" textAnchor="middle" alignmentBaseline="middle" fill="white" fontSize="10" style="animation: fadeIn 0.8s ease-out forwards; animation-delay: 0.9s;">15%</text>
-        <text x="80" y="54" textAnchor="middle" alignmentBaseline="middle" fill="white" fontSize="10" style="animation: fadeIn 0.8s ease-out forwards; animation-delay: 1.1s;">13%</text>
-        <text x="140" y="60" textAnchor="middle" alignmentBaseline="middle" fill="white" fontSize="10" style="animation: fadeIn 0.8s ease-out forwards; animation-delay: 1.3s;">21%</text>
+        <path
+          d="M161.28,151.42 A80,80 0 0 1 91.64,179.56 L95.30,144.75 A45,45 0 0 0 134.47,128.93 Z"
+          fill="url(#grad1)"
+          filter="url(#shadow)"
+          style={{
+            transformOrigin: '100px 100px',
+            animation: 'fanIn 0.8s ease-out forwards',
+            animationDelay: '0.2s',
+            opacity: 0
+          }}
+        />
+        <text x={123} y={157} textAnchor="middle" alignmentBaseline="middle" fill="#ffffff" fontSize={10}
+          style={{
+            animation: 'fadeIn 0.8s ease-out forwards',
+            animationDelay: '0.5s'
+          }}>
+          14%
+        </text>
+
+        <path
+          d="M91.64,179.56 A80,80 0 0 1 23.10,122.05 L56.74,112.40 A45,45 0 0 0 95.30,144.75 Z"
+          fill="url(#grad2)"
+          filter="url(#shadow)"
+          style={{
+            transformOrigin: '100px 100px',
+            animation: 'fanIn 0.8s ease-out forwards',
+            animationDelay: '0.4s',
+            opacity: 0
+          }}
+        />
+        <text x={62} y={155} textAnchor="middle" alignmentBaseline="middle" fill="#ffffff" fontSize={10}
+          style={{
+            animation: 'fadeIn 0.8s ease-out forwards',
+            animationDelay: '0.7s'
+          }}>
+          17%
+        </text>
+
+        <path
+          d="M23.10,122.05 A80,80 0 0 1 43.88,34.55 L66.99,63.35 A45,45 0 0 0 56.74,112.40 Z"
+          fill="url(#grad3)"
+          filter="url(#shadow)"
+          style={{
+            transformOrigin: '100px 100px',
+            animation: 'fanIn 0.8s ease-out forwards',
+            animationDelay: '0.6s',
+            opacity: 0
+          }}
+        />
+        <text x={42} y={95} textAnchor="middle" alignmentBaseline="middle" fill="#ffffff" fontSize={10}
+          style={{
+            animation: 'fadeIn 0.8s ease-out forwards',
+            animationDelay: '0.9s'
+          }}>
+          15%
+        </text>
+
+        <path
+          d="M43.88,34.55 A80,80 0 0 1 136.12,34.55 L118.78,62.63 A45,45 0 0 0 66.99,63.35 Z"
+          fill="url(#grad4)"
+          filter="url(#shadow)"
+          style={{
+            transformOrigin: '100px 100px',
+            animation: 'fanIn 0.8s ease-out forwards',
+            animationDelay: '0.8s',
+            opacity: 0
+          }}
+        />
+        <text x={80} y={54} textAnchor="middle" alignmentBaseline="middle" fill="#ffffff" fontSize={10}
+          style={{
+            animation: 'fadeIn 0.8s ease-out forwards',
+            animationDelay: '1.1s'
+          }}>
+          13%
+        </text>
+
+        <path
+          d="M136.12,34.55 A80,80 0 0 1 180.00,100.00 L145.00,100.00 A45,45 0 0 0 118.78,62.63 Z"
+          fill="url(#grad5)"
+          filter="url(#shadow)"
+          style={{
+            transformOrigin: '100px 100px',
+            animation: 'fanIn 0.8s ease-out forwards',
+            animationDelay: '1.0s',
+            opacity: 0
+          }}
+        />
+        <text x={140} y={60} textAnchor="middle" alignmentBaseline="middle" fill="#ffffff" fontSize={10}
+          style={{
+            animation: 'fadeIn 0.8s ease-out forwards',
+            animationDelay: '1.3s'
+          }}>
+          21%
+        </text>
       </svg>
     </div>
 
