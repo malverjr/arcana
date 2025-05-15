@@ -12,13 +12,18 @@ function getWeekNumber(date) {
 
 export default function Home() {
   const userRole = 'arcana+';
+  const isNormal = userRole === 'normal';
   const isArcana = userRole === 'arcana';
   const isArcanaPlus = userRole === 'arcana+';
   const isAdmin = userRole === 'admin';
 
   const themes = [
-    ...(isArcana || isArcanaPlus || isAdmin ? ["amor", "carrera", "sombra", "intuicion", "destino"] : []),
-    ...(isArcanaPlus || isAdmin ? ["crecimiento", "salud", "pasado", "presente", "futuro"] : [])
+    ...(isArcana || isArcanaPlus || isAdmin ? [
+      "amor", "carrera", "sombra", "intuicion", "destino"
+    ] : []),
+    ...(isArcanaPlus || isAdmin ? [
+      "crecimiento", "salud", "pasado", "presente", "futuro"
+    ] : [])
   ];
 
   const labels = {
@@ -53,13 +58,13 @@ export default function Home() {
   const [used, setUsed] = useState(0);
   const [nextReset, setNextReset] = useState(null);
   const [timeLeft, setTimeLeft] = useState("");
+  const timeoutRef = useRef(null);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [chartData, setChartData] = useState([]);
-  const timeoutRef = useRef(null);
 
   const maxDraws = isAdmin ? Infinity : isArcanaPlus ? 5 : isArcana ? 3 : 1;
-  const drawsLeft = maxDraws - used;
 
   const getPeriodKey = () => {
     const now = new Date();
@@ -167,11 +172,15 @@ export default function Home() {
     setChartData(formatted);
   };
   const handleCloseMap = () => setShowMap(false);
+  const drawsLeft = maxDraws - used;
 
   return (
     <div style={{
-      background: '#000', color: '#fff', minHeight: '100vh',
-      padding: '2rem 1rem 3rem', fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', minHeight: '100vh',
+      background: '#000', color: '#fff', padding: '2rem 1rem 3rem 1rem',
+      fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+      position: 'relative'
     }}>
       <Head><title>Arcana</title></Head>
 
@@ -179,7 +188,7 @@ export default function Home() {
         <button onClick={handleMenuToggle} style={{
           position: 'absolute', top: '1rem', right: '1rem',
           background: 'none', border: 'none', color: '#fff',
-          fontSize: '1.5rem', cursor: 'pointer'
+          fontSize: '1.5rem', cursor: 'pointer', zIndex: 20
         }}>
           {menuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -189,105 +198,141 @@ export default function Home() {
         <div style={{
           position: 'absolute', top: '3.5rem', right: '1rem',
           background: '#111', border: '1px solid #444',
-          borderRadius: '8px', overflow: 'hidden'
+          borderRadius: '8px', overflow: 'hidden', zIndex: 10
         }}>
           <button onClick={handleOpenMap} style={{
             padding: '0.75rem 1.5rem', background: 'none',
             color: '#fff', border: 'none', width: '100%',
             textAlign: 'left', cursor: 'pointer'
           }}>Mapa sentimental</button>
+          <button style={{
+            padding: '0.75rem 1.5rem', background: 'none',
+            color: '#fff', border: 'none', width: '100%',
+            textAlign: 'left', cursor: 'pointer'
+          }}>Cuenta</button>
         </div>
       )}
 
       {showMap ? (
-        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+        <div style={{ textAlign: 'center', marginTop: '4rem', width: '100%' }}>
           <h2 style={{ fontSize: '2rem', marginBottom: '2rem', letterSpacing: '0.05em' }}>Mapa sentimental</h2>
-
-          <svg viewBox="0 0 200 200" width="100%" height="auto">
-            {chartData.length > 0 && (() => {
-              const total = chartData.reduce((acc, d) => acc + d.value, 0);
-              let angle = 0;
-              return chartData.map((d, i) => {
-                const portion = d.value / total;
-                const [x1, y1] = [100 + 100 * Math.cos(2 * Math.PI * angle), 100 + 100 * Math.sin(2 * Math.PI * angle)];
-                angle += portion;
-                const [x2, y2] = [100 + 100 * Math.cos(2 * Math.PI * angle), 100 + 100 * Math.sin(2 * Math.PI * angle)];
-                const largeArc = portion > 0.5 ? 1 : 0;
-                return (
-                  <path
-                    key={i}
-                    d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc} 1 ${x2},${y2} Z`}
-                    fill={d.color}
-                    style={{
-                      transformOrigin: '100px 100px',
-                      animation: `fanIn 0.6s ease-out forwards`,
-                      animationDelay: `${i * 0.15}s`,
-                      filter: 'drop-shadow(0 0 6px rgba(0, 153, 255, 0.4))',
-                      opacity: 0
-                    }}
-                  />
-                );
-              });
-            })()}
-          </svg>
-
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', marginTop: '2rem', gap: '0.4rem'
-          }}>
-            {chartData.map((d, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                opacity: 0.9, animation: 'fadeIn 0.5s ease forwards',
-                animationDelay: `${i * 0.2}s`
-              }}>
-                <span style={{
-                  width: '12px', height: '12px', borderRadius: '50%',
-                  backgroundColor: d.color, display: 'inline-block'
-                }}></span>
-                {d.name}
-              </div>
-            ))}
+          <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+            <svg viewBox="0 0 200 200" width="100%" height="auto">
+              {chartData.length === 0 && (
+                <text x="50%" y="50%" fill="#888" fontSize="12" textAnchor="middle" alignmentBaseline="middle">
+                  Aún no hay tiradas
+                </text>
+              )}
+              {chartData.length > 0 && (() => {
+                const total = chartData.reduce((acc, d) => acc + d.value, 0);
+                let angle = 0;
+                return chartData.map((d, i) => {
+                  const portion = d.value / total;
+                  const [x1, y1] = [
+                    100 + 100 * Math.cos(2 * Math.PI * angle),
+                    100 + 100 * Math.sin(2 * Math.PI * angle)
+                  ];
+                  angle += portion;
+                  const [x2, y2] = [
+                    100 + 100 * Math.cos(2 * Math.PI * angle),
+                    100 + 100 * Math.sin(2 * Math.PI * angle)
+                  ];
+                  const largeArc = portion > 0.5 ? 1 : 0;
+                  return (
+                    <path
+                      key={i}
+                      d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc} 1 ${x2},${y2} Z`}
+                      fill={d.color}
+                      style={{ transition: 'all 0.4s ease' }}
+                      opacity={0.9}
+                    />
+                  );
+                });
+              })()}
+            </svg>
           </div>
-
           <button onClick={handleCloseMap} style={{
             marginTop: '2rem', padding: '0.6rem 1.2rem',
-            background: '#fff', color: '#000', borderRadius: '8px',
-            cursor: 'pointer', fontSize: '1rem'
+            background: '#fff', color: '#000',
+            borderRadius: '8px', cursor: 'pointer', fontSize: '1rem'
           }}>Volver</button>
-
-          <style jsx global>{`
-            @keyframes fanIn {
-              0% { transform: scale(0); opacity: 0; }
-              100% { transform: scale(1); opacity: 1; }
-            }
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to   { opacity: 1; }
-            }
-          `}</style>
         </div>
       ) : (
-        <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Arcana</h1>
-          <img src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif" alt="GIF" style={{
-            width: '300px', height: '300px', marginBottom: '2rem', objectFit: 'cover'
-          }} />
-          <p><strong>Tiradas restantes:</strong> {drawsLeft}</p>
-          <p style={{ opacity: 0.8 }}>Próxima tirada en: {timeLeft}</p>
+        <>
+          <h1 style={{ fontSize: '3rem', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Arcana</h1>
+          <img
+            src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+            alt="Animación Mística"
+            style={{ width: '300px', height: '300px', marginBottom: '2rem', objectFit: 'cover' }}
+          />
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            gap: '0.5rem', marginBottom: '1.5rem'
+          }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {themes.slice(0, 5).map(t => (
+                <button
+                  key={t} onClick={() => setSelected(t)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '4px',
+                    background: selected === t ? '#fff' : 'none',
+                    color: selected === t ? '#000' : '#fff',
+                    cursor: 'pointer'
+                  }}>
+                  {labels[t]}
+                </button>
+              ))}
+            </div>
+            {themes.length > 5 && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {themes.slice(5).map(t => (
+                  <button
+                    key={t} onClick={() => setSelected(t)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '4px',
+                      background: selected === t ? '#fff' : 'none',
+                      color: selected === t ? '#000' : '#fff',
+                      cursor: 'pointer'
+                    }}>
+                    {labels[t]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p style={{ marginBottom: '0.25rem' }}>
+            <strong>{isAdmin ? 'Administrador' : isArcanaPlus ? 'Usuario Arcana+' : isArcana ? 'Usuario Arcana' : 'Usuario Libre'}</strong>
+            {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
+          </p>
+          <p style={{ marginBottom: '1rem', opacity: 0.8 }}>
+            Próxima tirada en: {timeLeft}
+          </p>
+
           <button onClick={getReading} disabled={drawsLeft <= 0 && !isAdmin} style={{
             padding: '1rem 2rem', fontSize: '1.25rem',
             borderRadius: '8px', backgroundColor: '#fff', color: '#333',
             boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
             cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
             opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5
-          }}>{loading ? 'Leyendo…' : 'Haz tu tirada'}</button>
-          {reading && <div style={{
-            marginTop: '2rem', padding: '1rem 2rem',
-            background: 'rgba(255,255,255,0.1)', borderRadius: '8px',
-            animation: 'fadeIn 0.5s ease', maxWidth: '90vw'
-          }}>{reading}</div>}
-        </div>
+          }}>
+            {loading ? 'Leyendo…' : 'Haz tu tirada'}
+          </button>
+
+          {reading && (
+            <div style={{
+              marginTop: '2rem', padding: '1rem 2rem',
+              background: 'rgba(200,200,200,0.2)', borderRadius: '8px',
+              animation: 'fadeIn 0.5s ease', maxWidth: '90vw', textAlign: 'center'
+            }}>
+              <span>{reading}</span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
