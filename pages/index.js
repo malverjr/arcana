@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
-import { Menu, X } from 'lucide-react'; // Asegúrate de tenerlo instalado
+import { Menu, X } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -12,7 +13,6 @@ function getWeekNumber(date) {
 
 export default function Home() {
   const userRole = 'arcana+';
-
   const isNormal      = userRole === 'normal';
   const isArcana      = userRole === 'arcana';
   const isArcanaPlus  = userRole === 'arcana+';
@@ -40,16 +40,30 @@ export default function Home() {
     futuro:      "Futuro / Potencial"
   };
 
+  const colors = {
+    amor: "#ff80b5",
+    carrera: "#ffd86b",
+    sombra: "#8f5fff",
+    intuicion: "#5bb6ff",
+    destino: "#3a4eff",
+    crecimiento: "#85f6a2",
+    salud: "#5ce6cc",
+    pasado: "#c6b7ff",
+    presente: "#ffffff",
+    futuro: "#8cc5f2"
+  };
+
   const [selected, setSelected] = useState(themes[0]);
-  const [reading,  setReading]  = useState("");
-  const [loading,  setLoading]  = useState(false);
-  const [used,     setUsed]     = useState(0);
-  const [nextReset,setNextReset]= useState(null);
+  const [reading, setReading] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [used, setUsed] = useState(0);
+  const [nextReset, setNextReset] = useState(null);
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [chartData, setChartData] = useState([]);
 
   const maxDraws = isAdmin ? Infinity : isArcanaPlus ? 5 : isArcana ? 3 : 1;
 
@@ -130,7 +144,6 @@ export default function Home() {
       const { reading } = await res.json();
       setReading(reading);
 
-      // Guardar conteo de temática
       const key = "tiradasPorTematica";
       const data = JSON.parse(localStorage.getItem(key) || "{}");
       data[selected] = (data[selected] || 0) + 1;
@@ -148,23 +161,25 @@ export default function Home() {
   };
 
   const handleMenuToggle = () => setMenuOpen(!menuOpen);
-  const handleOpenMap = () => { setMenuOpen(false); setShowMap(true); };
+  const handleOpenMap = () => {
+    setMenuOpen(false);
+    setShowMap(true);
+    const stored = JSON.parse(localStorage.getItem("tiradasPorTematica") || "{}");
+    const formatted = Object.keys(stored).map(key => ({
+      name: labels[key],
+      value: stored[key],
+      color: colors[key]
+    }));
+    setChartData(formatted);
+  };
   const handleCloseMap = () => setShowMap(false);
-
   const drawsLeft = maxDraws - used;
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      background: '#000',
-      color: '#fff',
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', background: '#000', color: '#fff',
       fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      padding: '2rem 1rem 3rem 1rem',
-      position: 'relative'
+      padding: '2rem 1rem 3rem 1rem', position: 'relative'
     }}>
       <Head><title>Arcana</title></Head>
 
@@ -180,109 +195,96 @@ export default function Home() {
 
       {menuOpen && (
         <div style={{
-          position: 'absolute',
-          top: '3.5rem',
-          right: '1rem',
-          background: '#111',
-          border: '1px solid #444',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          zIndex: 10
+          position: 'absolute', top: '3.5rem', right: '1rem',
+          background: '#111', border: '1px solid #444',
+          borderRadius: '8px', overflow: 'hidden', zIndex: 10
         }}>
-          <button onClick={handleOpenMap} style={{ padding: '0.75rem 1.5rem', background: 'none', color: '#fff', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}>Mapa sentimental</button>
-          <button style={{ padding: '0.75rem 1.5rem', background: 'none', color: '#fff', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}>Cuenta</button>
+          <button onClick={handleOpenMap} style={{
+            padding: '0.75rem 1.5rem', background: 'none',
+            color: '#fff', border: 'none', width: '100%',
+            textAlign: 'left', cursor: 'pointer'
+          }}>Mapa sentimental</button>
+          <button style={{
+            padding: '0.75rem 1.5rem', background: 'none',
+            color: '#fff', border: 'none', width: '100%',
+            textAlign: 'left', cursor: 'pointer'
+          }}>Cuenta</button>
         </div>
       )}
 
       {showMap ? (
         <div>
-          <h2 style={{ marginTop: '5rem', textAlign: 'center' }}>🌀 Mapa sentimental (próximamente)</h2>
-          <button onClick={handleCloseMap} style={{ marginTop: '2rem', display: 'block', marginLeft: 'auto', marginRight: 'auto', padding: '0.5rem 1rem' }}>Volver</button>
+          <h2 style={{ marginTop: '5rem', textAlign: 'center' }}>🌀 Mapa sentimental</h2>
+          <div style={{ width: '100%', maxWidth: '400px', margin: '2rem auto' }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie data={chartData} dataKey="value" nameKey="name" outerRadius={120} innerRadius={60}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: '#111', borderColor: '#333', color: '#fff' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <button onClick={handleCloseMap} style={{
+            display: 'block', margin: '2rem auto', padding: '0.5rem 1rem'
+          }}>Volver</button>
         </div>
       ) : (
         <>
           <h1 style={{ fontSize: '3rem', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Arcana</h1>
 
-          <img
-            src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
-            alt="Animación Mística"
+          <img src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif" alt="Animación Mística"
             style={{ width: '300px', height: '300px', marginBottom: '2rem', objectFit: 'cover' }}
           />
 
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '1.5rem'
-          }}>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {themes.slice(0, 5).map(t => (
-                <button
-                  key={t}
-                  onClick={() => setSelected(t)}
-                  style={{
+          {(isArcana || isArcanaPlus || isAdmin) && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {themes.slice(0, 5).map(t => (
+                  <button key={t} onClick={() => setSelected(t)} style={{
                     padding: '0.5rem 1rem',
                     border: '1px solid rgba(255,255,255,0.3)',
                     borderRadius: '4px',
                     background: selected === t ? '#fff' : 'none',
                     color: selected === t ? '#000' : '#fff',
                     cursor: 'pointer'
-                  }}
-                >
-                  {labels[t]}
-                </button>
-              ))}
-            </div>
-            {themes.length > 5 && (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {themes.slice(5).map(t => (
-                  <button
-                    key={t}
-                    onClick={() => setSelected(t)}
-                    style={{
+                  }}>{labels[t]}</button>
+                ))}
+              </div>
+              {themes.length > 5 && (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {themes.slice(5).map(t => (
+                    <button key={t} onClick={() => setSelected(t)} style={{
                       padding: '0.5rem 1rem',
                       border: '1px solid rgba(255,255,255,0.3)',
                       borderRadius: '4px',
                       background: selected === t ? '#fff' : 'none',
                       color: selected === t ? '#000' : '#fff',
                       cursor: 'pointer'
-                    }}
-                  >
-                    {labels[t]}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+                    }}>{labels[t]}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <p style={{ marginBottom: '0.25rem' }}>
-            <strong>
-              {isAdmin ? 'Administrador' :
-              isArcanaPlus ? 'Usuario Arcana+' :
-              isArcana ? 'Usuario Arcana' :
-              'Usuario Libre'}
-            </strong> – Tiradas restantes: {isFinite(drawsLeft) ? drawsLeft : '∞'}
+            <strong>{isAdmin ? 'Administrador' : isArcanaPlus ? 'Usuario Arcana+' : isArcana ? 'Usuario Arcana' : 'Usuario Libre'}</strong>
+            {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
           </p>
-
           <p style={{ marginBottom: '1rem', opacity: 0.8 }}>
             Próxima tirada en: {timeLeft}
           </p>
 
-          <button
-            onClick={getReading}
-            disabled={drawsLeft <= 0 && !isAdmin}
-            style={{
-              padding: '1rem 2rem',
-              fontSize: '1.25rem',
-              borderRadius: '8px',
-              backgroundColor: '#fff',
-              color: '#333',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-              cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
-              opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5
-            }}
-          >
+          <button onClick={getReading} disabled={drawsLeft <= 0 && !isAdmin} style={{
+            padding: '1rem 2rem', fontSize: '1.25rem',
+            borderRadius: '8px', backgroundColor: '#fff', color: '#333',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+            cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
+            opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5
+          }}>
             {loading ? 'Leyendo…' : 'Haz tu tirada'}
           </button>
 
@@ -301,29 +303,6 @@ export default function Home() {
           )}
         </>
       )}
-
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-
-        .animated-reading {
-          background: linear-gradient(90deg, #ffffff, #5bb6ff, #3a4eff, #5bb6ff, #ffffff);
-          background-size: 300% auto;
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          -webkit-text-fill-color: transparent;
-          animation: shineText 8s ease-in-out infinite;
-        }
-
-        @keyframes shineText {
-          0%   { background-position: 0% center; }
-          50%  { background-position: 100% center; }
-          100% { background-position: 0% center; }
-        }
-      `}</style>
     </div>
   );
 }
