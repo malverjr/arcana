@@ -1,4 +1,4 @@
-import SentimentalChart from "@/components/SentimentalChart";
+import SentimentalChart from "../components/SentimentalChart";
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { Menu, X } from 'lucide-react';
