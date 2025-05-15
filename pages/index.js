@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 
-// Calcula el número de semana ISO del año
 function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
@@ -11,7 +10,7 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'arcana+'; // Cambia esto manualmente para testear diferentes roles
+  const userRole = 'arcana+'; // Cambiar según usuario actual
 
   const isNormal      = userRole === 'normal';
   const isArcana      = userRole === 'arcana';
@@ -141,22 +140,22 @@ export default function Home() {
 
   return (
     <div style={{
-      display:        'flex',
-      flexDirection:  'column',
-      alignItems:     'center',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
       justifyContent: 'center',
-      minHeight:      '100vh',
-      background:     '#000',
-      color:          '#fff',
-      fontFamily:     `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      padding:        '2rem 1rem'
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
+      fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+      padding: '2rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
 
       <h1 style={{
-        fontSize:      '3rem',
+        fontSize: '3rem',
         letterSpacing: '0.05em',
-        marginBottom:  '1.5rem'
+        marginBottom: '1.5rem'
       }}>
         Arcana
       </h1>
@@ -165,41 +164,79 @@ export default function Home() {
         src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
         alt="Animación Mística"
         style={{
-          width:        '300px',
-          height:       '300px',
+          width: '300px',
+          height: '300px',
           marginBottom: '2rem',
-          objectFit:    'cover'
+          objectFit: 'cover'
         }}
       />
 
       {(isArcana || isArcanaPlus || isAdmin) && (
-        <div style={{ display:'flex', gap:'0.5rem', marginBottom:'1.5rem' }}>
-          {themes.map(t => (
-            <button
-              key={t}
-              onClick={() => setSelected(t)}
-              style={{
-                padding:     '0.5rem 1rem',
-                border:      '1px solid rgba(255,255,255,0.3)',
-                borderRadius:'4px',
-                background:  selected === t ? '#fff' : 'none',
-                color:       selected === t ? '#000' : '#fff',
-                cursor:      'pointer',
-                transition:  'background 0.2s, color 0.2s'
-              }}
-              onMouseOver={e => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = '#000';
-              }}
-              onMouseOut={e => {
-                if (selected === t) return;
-                e.currentTarget.style.background = 'none';
-                e.currentTarget.style.color = '#fff';
-              }}
-            >
-              {labels[t]}
-            </button>
-          ))}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {themes.slice(0, 5).map(t => (
+              <button
+                key={t}
+                onClick={() => setSelected(t)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '4px',
+                  background: selected === t ? '#fff' : 'none',
+                  color: selected === t ? '#000' : '#fff',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.background = '#fff';
+                  e.currentTarget.style.color = '#000';
+                }}
+                onMouseOut={e => {
+                  if (selected === t) return;
+                  e.currentTarget.style.background = 'none';
+                  e.currentTarget.style.color = '#fff';
+                }}
+              >
+                {labels[t]}
+              </button>
+            ))}
+          </div>
+          {themes.length > 5 && (
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {themes.slice(5).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setSelected(t)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '4px',
+                    background: selected === t ? '#fff' : 'none',
+                    color: selected === t ? '#000' : '#fff',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s'
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.color = '#000';
+                  }}
+                  onMouseOut={e => {
+                    if (selected === t) return;
+                    e.currentTarget.style.background = 'none';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                >
+                  {labels[t]}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -214,10 +251,10 @@ export default function Home() {
       </p>
 
       <p style={{
-        marginBottom:  '1rem',
+        marginBottom: '1rem',
         letterSpacing: '0.02em',
-        fontSize:      '0.9rem',
-        opacity:       0.8
+        fontSize: '0.9rem',
+        opacity: 0.8
       }}>
         Próxima tirada en: {timeLeft}
       </p>
@@ -230,16 +267,16 @@ export default function Home() {
         onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
         disabled={drawsLeft <= 0 && !isAdmin}
         style={{
-          padding:        '1rem 2rem',
-          fontSize:       '1.25rem',
-          border:         'none',
-          borderRadius:   '8px',
-          backgroundColor:'#fff',
-          color:          '#333',
-          boxShadow:      '0 4px 8px rgba(0,0,0,0.2)',
-          cursor:         drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
-          opacity:        drawsLeft > 0 || isAdmin ? 1 : 0.5,
-          transition:     'transform 0.2s'
+          padding: '1rem 2rem',
+          fontSize: '1.25rem',
+          border: 'none',
+          borderRadius: '8px',
+          backgroundColor: '#fff',
+          color: '#333',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+          cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
+          opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5,
+          transition: 'transform 0.2s'
         }}
       >
         {loading ? 'Leyendo…' : 'Haz tu tirada'}
@@ -247,11 +284,11 @@ export default function Home() {
 
       {reading && (
         <div style={{
-          marginTop:    '2rem',
-          padding:      '1rem 2rem',
-          background:   'rgba(200,200,200,0.2)',
+          marginTop: '2rem',
+          padding: '1rem 2rem',
+          background: 'rgba(200,200,200,0.2)',
           borderRadius: '8px',
-          animation:    'fadeIn 0.5s ease'
+          animation: 'fadeIn 0.5s ease'
         }}>
           {reading}
         </div>
