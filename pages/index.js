@@ -213,61 +213,53 @@ export default function Home() {
         </div>
       )}
 
-      {showMap ? (
-  <div style={{ textAlign: 'center', marginTop: '4rem', width: '100%' }}>
-    <h2 style={{ fontSize: '2rem', marginBottom: '2rem', letterSpacing: '0.05em' }}>Mapa sentimental</h2>
+{showMap ? (
+  <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+    <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Mapa sentimental</h2>
 
     <div style={{ maxWidth: '400px', margin: '0 auto' }}>
       <svg viewBox="0 0 200 200" width="100%" height="auto">
-        {chartData.length === 0 && (
-          <text x="50%" y="50%" fill="#888" fontSize="12" textAnchor="middle" alignmentBaseline="middle">
-            Aún no hay tiradas
-          </text>
-        )}
-        {chartData.length > 0 && (() => {
-          const total = chartData.reduce((acc, d) => acc + d.value, 0);
-          let angle = 0;
-          return chartData.map((d, i) => {
-            const portion = d.value / total;
-            const [x1, y1] = [
-              100 + 100 * Math.cos(2 * Math.PI * angle),
-              100 + 100 * Math.sin(2 * Math.PI * angle)
-            ];
-            angle += portion;
-            const [x2, y2] = [
-              100 + 100 * Math.cos(2 * Math.PI * angle),
-              100 + 100 * Math.sin(2 * Math.PI * angle)
-            ];
-            const largeArc = portion > 0.5 ? 1 : 0;
-            return (
-              <path
-                key={i}
-                d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc} 1 ${x2},${y2} Z`}
-                fill={d.color}
-                style={{
-                  transformOrigin: '100px 100px',
-                  animation: `fanIn 0.6s ease-out forwards`,
-                  animationDelay: `${i * 0.15}s`,
-                  opacity: 0
-                }}
-              />
-            );
-          });
-        })()}
+        <defs>
+          <radialGradient id="grad0" cx="50%" cy="50%" r="80%">
+            <stop offset="0%" stopColor="#fff0" />
+            <stop offset="100%" stopColor="#ff80b5" />
+          </radialGradient>
+          <radialGradient id="grad1" cx="50%" cy="50%" r="80%">
+            <stop offset="0%" stopColor="#fff0" />
+            <stop offset="100%" stopColor="#ffd86b" />
+          </radialGradient>
+          <radialGradient id="grad2" cx="50%" cy="50%" r="80%">
+            <stop offset="0%" stopColor="#fff0" />
+            <stop offset="100%" stopColor="#8f5fff" />
+          </radialGradient>
+          <radialGradient id="grad3" cx="50%" cy="50%" r="80%">
+            <stop offset="0%" stopColor="#fff0" />
+            <stop offset="100%" stopColor="#85f6a2" />
+          </radialGradient>
+          <radialGradient id="grad4" cx="50%" cy="50%" r="80%">
+            <stop offset="0%" stopColor="#fff0" />
+            <stop offset="100%" stopColor="#8cc5f2" />
+          </radialGradient>
+        </defs>
+
+        {/* Rutas generadas con animación abanico */}
+        <path d="M100,100 L200.00,100.00 A100,100 0 0 1 100.00,200.00 Z" fill="url(#grad0)" style={{ transformOrigin: '100px 100px', animation: 'fanIn 0.8s ease-out forwards', animationDelay: '0s', opacity: 0 }} />
+        <path d="M100,100 L100.00,200.00 A100,100 0 0 1 4.89,130.90 Z" fill="url(#grad1)" style={{ transformOrigin: '100px 100px', animation: 'fanIn 0.8s ease-out forwards', animationDelay: '0.2s', opacity: 0 }} />
+        <path d="M100,100 L4.89,130.90 A100,100 0 0 1 43.88,34.55 Z" fill="url(#grad2)" style={{ transformOrigin: '100px 100px', animation: 'fanIn 0.8s ease-out forwards', animationDelay: '0.4s', opacity: 0 }} />
+        <path d="M100,100 L43.88,34.55 A100,100 0 0 1 156.12,34.55 Z" fill="url(#grad3)" style={{ transformOrigin: '100px 100px', animation: 'fanIn 0.8s ease-out forwards', animationDelay: '0.6s', opacity: 0 }} />
+        <path d="M100,100 L156.12,34.55 A100,100 0 0 1 200.00,100.00 Z" fill="url(#grad4)" style={{ transformOrigin: '100px 100px', animation: 'fanIn 0.8s ease-out forwards', animationDelay: '0.8s', opacity: 0 }} />
       </svg>
     </div>
 
     <button onClick={handleCloseMap} style={{
       marginTop: '2rem', padding: '0.6rem 1.2rem',
       background: '#fff', color: '#000',
-      borderRadius: '8px', cursor: 'pointer', fontSize: '1rem'
-    }}>
-      Volver
-    </button>
+      borderRadius: '8px', cursor: 'pointer'
+    }}>Volver</button>
 
     <style jsx global>{`
       @keyframes fanIn {
-        0% { transform: scale(0); opacity: 0; }
+        0% { transform: scale(0.2); opacity: 0; }
         100% { transform: scale(1); opacity: 1; }
       }
     `}</style>
