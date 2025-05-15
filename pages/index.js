@@ -10,7 +10,7 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'admin';
+  const userRole = 'arcana+';
 
   const isNormal      = userRole === 'normal';
   const isArcana      = userRole === 'arcana';
@@ -125,6 +125,13 @@ export default function Home() {
       const res = await fetch(url);
       const { reading } = await res.json();
       setReading(reading);
+
+      // Guardar conteo de temática en localStorage
+      const key = "tiradasPorTematica";
+      const data = JSON.parse(localStorage.getItem(key) || "{}");
+      data[selected] = (data[selected] || 0) + 1;
+      localStorage.setItem(key, JSON.stringify(data));
+
       setUsed(u => {
         const nu = u + 1;
         localStorage.setItem("drawsUsed", String(nu));
@@ -148,7 +155,7 @@ export default function Home() {
       background: '#000',
       color: '#fff',
       fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      padding: '2rem 1rem'
+      padding: '2rem 1rem 3rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
 
