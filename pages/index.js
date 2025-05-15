@@ -212,26 +212,63 @@ export default function Home() {
         </div>
       )}
 
-      {showMap ? (
-        <div>
-          <h2 style={{ marginTop: '5rem', textAlign: 'center' }}>🌀 Mapa sentimental</h2>
-          <div style={{ width: '100%', maxWidth: '400px', margin: '2rem auto' }}>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={chartData} dataKey="value" nameKey="name" outerRadius={120} innerRadius={60}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#111', borderColor: '#333', color: '#fff' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <button onClick={handleCloseMap} style={{
-            display: 'block', margin: '2rem auto', padding: '0.5rem 1rem'
-          }}>Volver</button>
-        </div>
-      ) : (
+{showMap ? (
+  <div style={{ textAlign: 'center', marginTop: '4rem', width: '100%' }}>
+    <h2 style={{ fontSize: '2rem', marginBottom: '2rem', letterSpacing: '0.05em' }}>Mapa sentimental</h2>
+
+    <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+      <svg viewBox="0 0 200 200" width="100%" height="auto">
+        {chartData.length === 0 && (
+          <text x="50%" y="50%" fill="#888" fontSize="12" textAnchor="middle" alignmentBaseline="middle">
+            Aún no hay tiradas
+          </text>
+        )}
+
+        {chartData.length > 0 && (() => {
+          const total = chartData.reduce((acc, d) => acc + d.value, 0);
+          let angle = 0;
+
+          return chartData.map((d, i) => {
+            const portion = d.value / total;
+            const [x1, y1] = [
+              100 + 100 * Math.cos(2 * Math.PI * angle),
+              100 + 100 * Math.sin(2 * Math.PI * angle)
+            ];
+            angle += portion;
+            const [x2, y2] = [
+              100 + 100 * Math.cos(2 * Math.PI * angle),
+              100 + 100 * Math.sin(2 * Math.PI * angle)
+            ];
+            const largeArc = portion > 0.5 ? 1 : 0;
+
+            return (
+              <path
+                key={i}
+                d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc} 1 ${x2},${y2} Z`}
+                fill={d.color}
+                style={{ transition: 'all 0.4s ease' }}
+                opacity={0.85}
+              />
+            );
+          });
+        })()}
+      </svg>
+    </div>
+
+    <button onClick={handleCloseMap} style={{
+      marginTop: '2rem',
+      padding: '0.6rem 1.2rem',
+      background: '#fff',
+      color: '#000',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '1rem'
+    }}>
+      Volver
+    </button>
+  </div>
+) : (
+
         <>
           <h1 style={{ fontSize: '3rem', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Arcana</h1>
 
