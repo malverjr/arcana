@@ -11,18 +11,35 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'premium';
-  const isPremium = userRole === 'premium' || userRole === 'admin';
-  const isAdmin   = userRole === 'admin';
+  const userRole = 'arcana+'; // Cambia esto manualmente para testear diferentes roles
 
-  const themes = ["amor", "carrera", "sombra", "intuicion", "destino"];
+  const isNormal      = userRole === 'normal';
+  const isArcana      = userRole === 'arcana';
+  const isArcanaPlus  = userRole === 'arcana+';
+  const isAdmin       = userRole === 'admin';
+
+  const themes = [
+    ...(isArcana || isArcanaPlus || isAdmin ? [
+      "amor", "carrera", "sombra", "intuicion", "destino"
+    ] : []),
+    ...(isArcanaPlus || isAdmin ? [
+      "crecimiento", "salud", "pasado", "presente", "futuro"
+    ] : [])
+  ];
+
   const labels = {
-    amor:      "Amor & Relaciones",
-    carrera:   "Carrera & Abundancia",
-    sombra:    "Sombra & Transformación",
-    intuicion: "Intuición & Misterio",
-    destino:   "Propósito & Destino"
+    amor:        "Amor & Relaciones",
+    carrera:     "Carrera & Abundancia",
+    sombra:      "Sombra & Transformación",
+    intuicion:   "Intuición & Misterio",
+    destino:     "Propósito & Destino",
+    crecimiento: "Crecimiento Personal",
+    salud:       "Salud & Bienestar",
+    pasado:      "Pasado",
+    presente:    "Presente",
+    futuro:      "Futuro / Potencial"
   };
+
   const [selected, setSelected] = useState(themes[0]);
   const [reading,  setReading]  = useState("");
   const [loading,  setLoading]  = useState(false);
@@ -31,11 +48,11 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
 
-  const maxDraws = isAdmin ? Infinity : isPremium ? 3 : 1;
+  const maxDraws = isAdmin ? Infinity : isArcanaPlus ? 5 : isArcana ? 3 : 1;
 
   const getPeriodKey = () => {
     const now = new Date();
-    if (isPremium && !isAdmin) {
+    if (isArcana || isArcanaPlus) {
       const w = getWeekNumber(now);
       return `${now.getFullYear()}-W${String(w).padStart(2, '0')}`;
     }
@@ -45,7 +62,7 @@ export default function Home() {
   const getNextResetDate = () => {
     const now = new Date();
     let nxt;
-    if (isPremium && !isAdmin) {
+    if (isArcana || isArcanaPlus) {
       const daysToMonday = (8 - now.getDay()) % 7;
       nxt = new Date(now);
       nxt.setDate(now.getDate() + daysToMonday);
@@ -105,9 +122,7 @@ export default function Home() {
     setLoading(true);
     setReading("");
     try {
-      const url = isPremium
-        ? `/api/tarot?theme=${selected}`
-        : `/api/tarot`;
+      const url = `/api/tarot?theme=${selected}`;
       const res = await fetch(url);
       const { reading } = await res.json();
       setReading(reading);
@@ -153,12 +168,11 @@ export default function Home() {
           width:        '300px',
           height:       '300px',
           marginBottom: '2rem',
-          objectFit:    'cover',
-          animation:    'float 4s ease-in-out infinite'
+          objectFit:    'cover'
         }}
       />
 
-      {isPremium && !isAdmin && (
+      {(isArcana || isArcanaPlus || isAdmin) && (
         <div style={{ display:'flex', gap:'0.5rem', marginBottom:'1.5rem' }}>
           {themes.map(t => (
             <button
@@ -191,7 +205,10 @@ export default function Home() {
 
       <p style={{ marginBottom: '0.25rem', letterSpacing: '0.02em', fontSize: '1rem' }}>
         <strong>
-          {isAdmin ? 'Administrador' : isPremium ? 'Usuario Arcana' : 'Usuario Libre'}
+          {isAdmin ? 'Administrador' :
+           isArcanaPlus ? 'Usuario Arcana+' :
+           isArcana ? 'Usuario Arcana' :
+           'Usuario Libre'}
         </strong>
         {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
       </p>
@@ -241,10 +258,6 @@ export default function Home() {
       )}
 
       <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-10px); }
-        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
@@ -254,7 +267,6 @@ export default function Home() {
           50%     { transform: scale(1.05); }
         }
 
-        /* Responsive para móviles */
         @media (max-width: 600px) {
           h1 {
             font-size: 2rem !important;
