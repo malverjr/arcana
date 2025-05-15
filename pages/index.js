@@ -10,7 +10,7 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'admin';
+  const userRole = 'arcana+'; // Cambiar según usuario actual
 
   const isNormal      = userRole === 'normal';
   const isArcana      = userRole === 'arcana';
@@ -208,7 +208,7 @@ export default function Home() {
             ))}
           </div>
           {themes.length > 5 && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               {themes.slice(5).map(t => (
                 <button
                   key={t}
@@ -286,14 +286,9 @@ export default function Home() {
         <div style={{
           marginTop: '2rem',
           padding: '1rem 2rem',
-          background: 'rgba(20,20,30,0.6)',
-          border: '2px solid #5bb6ff',
-          borderRadius: '12px',
-          animation: 'revealBox 0.6s ease',
-          boxShadow: '0 0 20px #5bb6ff, 0 0 40px #5bb6ff40',
-          transition: 'all 0.5s ease',
-          maxWidth: '90vw',
-          textAlign: 'center'
+          background: 'rgba(200,200,200,0.2)',
+          borderRadius: '8px',
+          animation: 'fadeIn 0.5s ease'
         }}>
           {reading}
         </div>
@@ -308,38 +303,32 @@ export default function Home() {
           0%,100% { transform: scale(1); }
           50%     { transform: scale(1.05); }
         }
-        @keyframes revealBox {
-          0% {
-            opacity: 0;
-            transform: scale(0.9);
-            box-shadow: 0 0 0 transparent;
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-            box-shadow: 0 0 20px #5bb6ff, 0 0 40px #5bb6ff40;
-          }
-        }
+
         @media (max-width: 600px) {
           h1 {
             font-size: 2rem !important;
             text-align: center;
           }
+
           img {
             width: 200px !important;
             height: 200px !important;
           }
+
           button {
             font-size: 1rem !important;
             padding: 0.75rem 1.5rem !important;
           }
+
           p {
             text-align: center;
           }
+
           div[style*="gap"] {
             flex-direction: column !important;
             gap: 0.75rem !important;
           }
+
           div[style*="padding: 1rem 2rem"] {
             padding: 1rem !important;
           }
