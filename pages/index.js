@@ -138,78 +138,49 @@ export default function Home() {
 
   const drawsLeft = maxDraws - used;
 
-return (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: '#000',
-    color: '#fff',
-    fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-    padding: '3rem 1rem 5rem 1rem' // cambiado aquí
-  }}>
-    <Head><title>Arcana</title></Head>
-
-    <h1 style={{
-      fontSize: '3rem',
-      letterSpacing: '0.05em',
-      marginBottom: '1.5rem'
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
+      fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+      padding: '2rem 1rem'
     }}>
-      Arcana
-    </h1>
+      <Head><title>Arcana</title></Head>
 
-    <img
-      src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
-      alt="Animación Mística"
-      style={{
-        width: '300px',
-        height: '300px',
-        marginBottom: '2rem',
-        objectFit: 'cover'
-      }}
-    />
-
-    {(isArcana || isArcanaPlus || isAdmin) && (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '0.5rem',
+      <h1 style={{
+        fontSize: '3rem',
+        letterSpacing: '0.05em',
         marginBottom: '1.5rem'
       }}>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {themes.slice(0, 5).map(t => (
-            <button
-              key={t}
-              onClick={() => setSelected(t)}
-              style={{
-                padding: '0.5rem 1rem',
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: '4px',
-                background: selected === t ? '#fff' : 'none',
-                color: selected === t ? '#000' : '#fff',
-                cursor: 'pointer',
-                transition: 'background 0.2s, color 0.2s'
-              }}
-              onMouseOver={e => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = '#000';
-              }}
-              onMouseOut={e => {
-                if (selected === t) return;
-                e.currentTarget.style.background = 'none';
-                e.currentTarget.style.color = '#fff';
-              }}
-            >
-              {labels[t]}
-            </button>
-          ))}
-        </div>
-        {themes.length > 5 && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
-            {themes.slice(5).map(t => (
+        Arcana
+      </h1>
+
+      <img
+        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+        alt="Animación Mística"
+        style={{
+          width: '300px',
+          height: '300px',
+          marginBottom: '2rem',
+          objectFit: 'cover'
+        }}
+      />
+
+      {(isArcana || isArcanaPlus || isAdmin) && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {themes.slice(0, 5).map(t => (
               <button
                 key={t}
                 onClick={() => setSelected(t)}
@@ -236,132 +207,38 @@ return (
               </button>
             ))}
           </div>
-        )}
-      </div>
-    )}
-
-    {/* BLOQUE MEJORADO: más espacio entre líneas */}
-    <p style={{
-      marginBottom: '0.75rem',
-      letterSpacing: '0.02em',
-      fontSize: '1rem',
-      lineHeight: '1.6'
-    }}>
-      <strong>
-        {isAdmin ? 'Administrador' :
-         isArcanaPlus ? 'Usuario Arcana+' :
-         isArcana ? 'Usuario Arcana' :
-         'Usuario Libre'}
-      </strong>
-      {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
-    </p>
-
-    <p style={{
-      marginBottom: '2rem',
-      letterSpacing: '0.02em',
-      fontSize: '0.9rem',
-      lineHeight: '1.6',
-      opacity: 0.8
-    }}>
-      Próxima tirada en: {timeLeft}
-    </p>
-
-    <button
-      onClick={e => {
-        e.currentTarget.style.animation = 'bounce 0.3s ease';
-        getReading();
-      }}
-      onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
-      disabled={drawsLeft <= 0 && !isAdmin}
-      style={{
-        padding: '1rem 2rem',
-        fontSize: '1.25rem',
-        border: 'none',
-        borderRadius: '8px',
-        backgroundColor: '#fff',
-        color: '#333',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-        cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
-        opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5,
-        transition: 'transform 0.2s'
-      }}
-    >
-      {loading ? 'Leyendo…' : 'Haz tu tirada'}
-    </button>
-
-    {reading && (
-      <div style={{
-        marginTop: '2rem',
-        padding: '1rem 2rem',
-        background: 'rgba(200,200,200,0.2)',
-        borderRadius: '8px',
-        animation: 'fadeIn 0.5s ease',
-        maxWidth: '90vw',
-        textAlign: 'center'
-      }}>
-        <span className="animated-reading">{reading}</span>
-      </div>
-    )}
-
-    {/* CSS GLOBAL */}
-    <style jsx global>{`
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
-
-      @keyframes bounce {
-        0%,100% { transform: scale(1); }
-        50%     { transform: scale(1.05); }
-      }
-
-      .animated-reading {
-        background: linear-gradient(90deg, #ffffff, #5bb6ff, #3a4eff, #5bb6ff, #ffffff);
-        background-size: 300% auto;
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-        animation: shineText 8s ease-in-out infinite;
-      }
-
-      @keyframes shineText {
-        0%   { background-position: 0% center; }
-        50%  { background-position: 100% center; }
-        100% { background-position: 0% center; }
-      }
-
-      @media (max-width: 600px) {
-        h1 {
-          font-size: 2rem !important;
-          text-align: center;
-        }
-        img {
-          width: 200px !important;
-          height: 200px !important;
-        }
-        button {
-          font-size: 1rem !important;
-          padding: 0.75rem 1.5rem !important;
-        }
-        p {
-          text-align: center;
-        }
-        div[style*="gap"] {
-          flex-direction: column !important;
-          gap: 0.75rem !important;
-        }
-        div[style*="padding: 1rem 2rem"] {
-          padding: 1rem !important;
-        }
-        /* NUEVO: más espacio inferior en móvil */
-        div[style*="minHeight: '100vh'"] {
-          padding-bottom: 6rem !important;
-        }
-      }
-    `}</style>
-  </div>
-);
+          {themes.length > 5 && (
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
+              {themes.slice(5).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setSelected(t)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '4px',
+                    background: selected === t ? '#fff' : 'none',
+                    color: selected === t ? '#000' : '#fff',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s'
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.color = '#000';
+                  }}
+                  onMouseOut={e => {
+                    if (selected === t) return;
+                    e.currentTarget.style.background = 'none';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                >
+                  {labels[t]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
 <p style={{
   marginBottom: '0.75rem',
