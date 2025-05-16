@@ -1,7 +1,5 @@
-import SentimentalChart from "../components/SentimentalChart";
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
-import { Menu, X } from 'lucide-react';
 
 function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -12,11 +10,12 @@ function getWeekNumber(date) {
 }
 
 export default function Home() {
-  const userRole = 'admin';
-  const isNormal = userRole === 'normal';
-  const isArcana = userRole === 'arcana';
-  const isArcanaPlus = userRole === 'arcana+';
-  const isAdmin = userRole === 'admin';
+  const userRole = 'arcana+';
+
+  const isNormal      = userRole === 'normal';
+  const isArcana      = userRole === 'arcana';
+  const isArcanaPlus  = userRole === 'arcana+';
+  const isAdmin       = userRole === 'admin';
 
   const themes = [
     ...(isArcana || isArcanaPlus || isAdmin ? [
@@ -28,42 +27,25 @@ export default function Home() {
   ];
 
   const labels = {
-    amor: "Amor & Relaciones",
-    carrera: "Carrera & Abundancia",
-    sombra: "Sombra & Transformación",
-    intuicion: "Intuición & Misterio",
-    destino: "Propósito & Destino",
+    amor:        "Amor & Relaciones",
+    carrera:     "Carrera & Abundancia",
+    sombra:      "Sombra & Transformación",
+    intuicion:   "Intuición & Misterio",
+    destino:     "Propósito & Destino",
     crecimiento: "Crecimiento Personal",
-    salud: "Salud & Bienestar",
-    pasado: "Pasado",
-    presente: "Presente",
-    futuro: "Futuro / Potencial"
-  };
-
-  const colors = {
-    amor: "#ff80b5",
-    carrera: "#ffd86b",
-    sombra: "#8f5fff",
-    intuicion: "#5bb6ff",
-    destino: "#3a4eff",
-    crecimiento: "#85f6a2",
-    salud: "#5ce6cc",
-    pasado: "#c6b7ff",
-    presente: "#ffffff",
-    futuro: "#8cc5f2"
+    salud:       "Salud & Bienestar",
+    pasado:      "Pasado",
+    presente:    "Presente",
+    futuro:      "Futuro / Potencial"
   };
 
   const [selected, setSelected] = useState(themes[0]);
-  const [reading, setReading] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [used, setUsed] = useState(0);
-  const [nextReset, setNextReset] = useState(null);
+  const [reading,  setReading]  = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [used,     setUsed]     = useState(0);
+  const [nextReset,setNextReset]= useState(null);
   const [timeLeft, setTimeLeft] = useState("");
   const timeoutRef = useRef(null);
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [showMap, setShowMap] = useState(false);
-  const [chartData, setChartData] = useState([]);
 
   const maxDraws = isAdmin ? Infinity : isArcanaPlus ? 5 : isArcana ? 3 : 1;
 
@@ -143,12 +125,6 @@ export default function Home() {
       const res = await fetch(url);
       const { reading } = await res.json();
       setReading(reading);
-
-      const key = "tiradasPorTematica";
-      const data = JSON.parse(localStorage.getItem(key) || "{}");
-      data[selected] = (data[selected] || 0) + 1;
-      localStorage.setItem(key, JSON.stringify(data));
-
       setUsed(u => {
         const nu = u + 1;
         localStorage.setItem("drawsUsed", String(nu));
@@ -160,144 +136,218 @@ export default function Home() {
     setLoading(false);
   };
 
-  const handleMenuToggle = () => setMenuOpen(!menuOpen);
-  const handleOpenMap = () => {
-    setMenuOpen(false);
-    setShowMap(true);
-    const stored = JSON.parse(localStorage.getItem("tiradasPorTematica") || "{}");
-    const formatted = Object.keys(stored).map(key => ({
-      name: labels[key],
-      value: stored[key],
-      color: colors[key]
-    }));
-    setChartData(formatted);
-  };
-  const handleCloseMap = () => setShowMap(false);
   const drawsLeft = maxDraws - used;
 
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', minHeight: '100vh',
-      background: '#000', color: '#fff', padding: '2rem 1rem 3rem 1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
       fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      position: 'relative'
+      padding: '2rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
 
-      {(isArcana || isArcanaPlus) && (
-        <button onClick={handleMenuToggle} style={{
-          position: 'absolute', top: '1rem', right: '1rem',
-          background: 'none', border: 'none', color: '#fff',
-          fontSize: '1.5rem', cursor: 'pointer', zIndex: 20
-        }}>
-          {menuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-      )}
+      <h1 style={{
+        fontSize: '3rem',
+        letterSpacing: '0.05em',
+        marginBottom: '1.5rem'
+      }}>
+        Arcana
+      </h1>
 
-      {menuOpen && (
+      <img
+        src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
+        alt="Animación Mística"
+        style={{
+          width: '300px',
+          height: '300px',
+          marginBottom: '2rem',
+          objectFit: 'cover'
+        }}
+      />
+
+      {(isArcana || isArcanaPlus || isAdmin) && (
         <div style={{
-          position: 'absolute', top: '3.5rem', right: '1rem',
-          background: '#111', border: '1px solid #444',
-          borderRadius: '8px', overflow: 'hidden', zIndex: 10
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
         }}>
-          <button onClick={handleOpenMap} style={{
-            padding: '0.75rem 1.5rem', background: 'none',
-            color: '#fff', border: 'none', width: '100%',
-            textAlign: 'left', cursor: 'pointer'
-          }}>Mapa sentimental</button>
-          <button style={{
-            padding: '0.75rem 1.5rem', background: 'none',
-            color: '#fff', border: 'none', width: '100%',
-            textAlign: 'left', cursor: 'pointer'
-          }}>Cuenta</button>
-        </div>
-      )}
-
-      {showMap ? <SentimentalChart /> : (
-        <>
-          <h1 style={{ fontSize: '3rem', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Arcana</h1>
-          <img
-            src="/Art%20Glow%20GIF%20by%20xponentialdesign.gif"
-            alt="Animación Mística"
-            style={{ width: '300px', height: '300px', marginBottom: '2rem', objectFit: 'cover' }}
-          />
-
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            gap: '0.5rem', marginBottom: '1.5rem'
-          }}>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {themes.slice(0, 5).map(t => (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {themes.slice(0, 5).map(t => (
+              <button
+                key={t}
+                onClick={() => setSelected(t)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '4px',
+                  background: selected === t ? '#fff' : 'none',
+                  color: selected === t ? '#000' : '#fff',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.background = '#fff';
+                  e.currentTarget.style.color = '#000';
+                }}
+                onMouseOut={e => {
+                  if (selected === t) return;
+                  e.currentTarget.style.background = 'none';
+                  e.currentTarget.style.color = '#fff';
+                }}
+              >
+                {labels[t]}
+              </button>
+            ))}
+          </div>
+          {themes.length > 5 && (
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
+              {themes.slice(5).map(t => (
                 <button
-                  key={t} onClick={() => setSelected(t)}
+                  key={t}
+                  onClick={() => setSelected(t)}
                   style={{
                     padding: '0.5rem 1rem',
                     border: '1px solid rgba(255,255,255,0.3)',
                     borderRadius: '4px',
                     background: selected === t ? '#fff' : 'none',
                     color: selected === t ? '#000' : '#fff',
-                    cursor: 'pointer'
-                  }}>
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s'
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.color = '#000';
+                  }}
+                  onMouseOut={e => {
+                    if (selected === t) return;
+                    e.currentTarget.style.background = 'none';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                >
                   {labels[t]}
                 </button>
               ))}
             </div>
-            {themes.length > 5 && (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {themes.slice(5).map(t => (
-                  <button
-                    key={t} onClick={() => setSelected(t)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '4px',
-                      background: selected === t ? '#fff' : 'none',
-                      color: selected === t ? '#000' : '#fff',
-                      cursor: 'pointer'
-                    }}>
-                    {labels[t]}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <p style={{ marginBottom: '0.25rem' }}>
-            <strong>{isAdmin ? 'Administrador' : isArcanaPlus ? 'Usuario Arcana+' : isArcana ? 'Usuario Arcana' : 'Usuario Libre'}</strong>
-            {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
-          </p>
-          <p style={{ marginBottom: '1rem', opacity: 0.8 }}>
-            Próxima tirada en: {timeLeft}
-          </p>
-
-          <button onClick={getReading} disabled={drawsLeft <= 0 && !isAdmin} style={{
-            padding: '1rem 2rem', fontSize: '1.25rem',
-            borderRadius: '8px', backgroundColor: '#fff', color: '#333',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-            cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
-            opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5
-          }}>
-            {loading ? 'Leyendo…' : 'Haz tu tirada'}
-          </button>
-
-          {reading && (
-            <div style={{
-              marginTop: '2rem', padding: '1rem 2rem',
-              borderRadius: '8px', maxWidth: '90vw', textAlign: 'center',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))',
-              color: '#fff',
-              fontSize: '1.2rem',
-              fontWeight: 500,
-              letterSpacing: '0.05em',
-              textShadow: '0 0 10px rgba(173,216,230,0.4)',
-              animation: 'glow 5s ease-in-out infinite alternate'
-            }}>
-              <span>{reading}</span>
-            </div>
           )}
-        </>
+        </div>
       )}
+
+      <p style={{ marginBottom: '0.25rem', letterSpacing: '0.02em', fontSize: '1rem' }}>
+        <strong>
+          {isAdmin ? 'Administrador' :
+           isArcanaPlus ? 'Usuario Arcana+' :
+           isArcana ? 'Usuario Arcana' :
+           'Usuario Libre'}
+        </strong>
+        {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
+      </p>
+
+      <p style={{
+        marginBottom: '1rem',
+        letterSpacing: '0.02em',
+        fontSize: '0.9rem',
+        opacity: 0.8
+      }}>
+        Próxima tirada en: {timeLeft}
+      </p>
+
+      <button
+        onClick={e => {
+          e.currentTarget.style.animation = 'bounce 0.3s ease';
+          getReading();
+        }}
+        onAnimationEnd={e => { e.currentTarget.style.animation = ''; }}
+        disabled={drawsLeft <= 0 && !isAdmin}
+        style={{
+          padding: '1rem 2rem',
+          fontSize: '1.25rem',
+          border: 'none',
+          borderRadius: '8px',
+          backgroundColor: '#fff',
+          color: '#333',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+          cursor: drawsLeft > 0 || isAdmin ? 'pointer' : 'not-allowed',
+          opacity: drawsLeft > 0 || isAdmin ? 1 : 0.5,
+          transition: 'transform 0.2s'
+        }}
+      >
+        {loading ? 'Leyendo…' : 'Haz tu tirada'}
+      </button>
+
+      {reading && (
+        <div style={{
+          marginTop: '2rem',
+          padding: '1rem 2rem',
+          background: 'rgba(200,200,200,0.2)',
+          borderRadius: '8px',
+          animation: 'fadeIn 0.5s ease',
+          maxWidth: '90vw',
+          textAlign: 'center'
+        }}>
+          <span className="animated-reading">{reading}</span>
+        </div>
+      )}
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+
+        @keyframes bounce {
+          0%,100% { transform: scale(1); }
+          50%     { transform: scale(1.05); }
+        }
+
+        .animated-reading {
+          background: linear-gradient(90deg, #ffffff, #5bb6ff, #3a4eff, #5bb6ff, #ffffff);
+          background-size: 300% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: shineText 8s ease-in-out infinite;
+        }
+
+        @keyframes shineText {
+          0%   { background-position: 0% center; }
+          50%  { background-position: 100% center; }
+          100% { background-position: 0% center; }
+        }
+
+        @media (max-width: 600px) {
+          h1 {
+            font-size: 2rem !important;
+            text-align: center;
+          }
+          img {
+            width: 200px !important;
+            height: 200px !important;
+          }
+          button {
+            font-size: 1rem !important;
+            padding: 0.75rem 1.5rem !important;
+          }
+          p {
+            text-align: center;
+          }
+          div[style*="gap"] {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+          }
+          div[style*="padding: 1rem 2rem"] {
+            padding: 1rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
