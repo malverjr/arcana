@@ -214,7 +214,7 @@ export default function Home() {
         </div>
       )}
 
-{showMap ? <SentimentalChart /> : (
+      {showMap ? <SentimentalChart /> : (
         <>
           <h1 style={{ fontSize: '3rem', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Arcana</h1>
           <img
@@ -222,6 +222,7 @@ export default function Home() {
             alt="Animación Mística"
             style={{ width: '300px', height: '300px', marginBottom: '2rem', objectFit: 'cover' }}
           />
+
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             gap: '0.5rem', marginBottom: '1.5rem'
@@ -283,8 +284,14 @@ export default function Home() {
           {reading && (
             <div style={{
               marginTop: '2rem', padding: '1rem 2rem',
-              background: 'rgba(200,200,200,0.2)', borderRadius: '8px',
-              animation: 'fadeIn 0.5s ease', maxWidth: '90vw', textAlign: 'center'
+              borderRadius: '8px', maxWidth: '90vw', textAlign: 'center',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))',
+              color: '#fff',
+              fontSize: '1.2rem',
+              fontWeight: 500,
+              letterSpacing: '0.05em',
+              textShadow: '0 0 10px rgba(173,216,230,0.4)',
+              animation: 'glow 5s ease-in-out infinite alternate'
             }}>
               <span>{reading}</span>
             </div>
