@@ -8,32 +8,27 @@ const SentimentalChart = () => {
       trigger: "item",
       formatter: "{b}: {c}%",
     },
-    legend: {
-      show: false,
-    },
     series: [
       {
-        name: "Mapa sentimental",
         type: "pie",
-        radius: ["35%", "70%"],
+        radius: ["40%", "75%"],
         roseType: "area",
-        avoidLabelOverlap: false,
         itemStyle: {
-          borderRadius: 10,
-          shadowBlur: 15,
-          shadowColor: "rgba(0, 0, 0, 0.5)",
+          borderRadius: 8,
+          shadowBlur: 25,
+          shadowColor: "rgba(0, 0, 0, 0.4)",
         },
         label: {
-          show: true,
-          formatter: "{b}",
           color: "#fff",
-          fontSize: 14,
-          overflow: "truncate",
+          fontSize: 16,
+          overflow: "break",
         },
         labelLine: {
-          show: true,
+          length: 15,
+          length2: 20,
+          smooth: true,
           lineStyle: {
-            color: "#888",
+            color: "#aaa",
           },
         },
         data: [
@@ -50,18 +45,37 @@ const SentimentalChart = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center px-4">
-      <h2 className="text-white text-2xl mb-6">Mapa sentimental</h2>
-      <div className="w-full max-w-[900px] h-[600px]">
-        <ReactECharts
-          option={option}
-          style={{ height: "100%", width: "100%" }}
-          opts={{ renderer: "canvas", devicePixelRatio: 3 }}
-        />
-      </div>
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "1000px",
+        height: "600px",
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "2rem",
+      }}
+    >
+      <h2 style={{ color: "#fff", fontSize: "2rem", marginBottom: "2rem" }}>
+        Mapa sentimental
+      </h2>
+      <ReactECharts
+        option={option}
+        style={{ width: "100%", height: "100%" }}
+        opts={{ renderer: "canvas", devicePixelRatio: 3 }}
+      />
       <button
         onClick={() => window.history.back()}
-        className="mt-8 bg-white text-black rounded px-4 py-2 text-sm shadow-md hover:bg-gray-200 transition"
+        style={{
+          marginTop: "2rem",
+          background: "#fff",
+          color: "#000",
+          padding: "0.5rem 1rem",
+          borderRadius: "6px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          cursor: "pointer",
+        }}
       >
         Volver
       </button>
