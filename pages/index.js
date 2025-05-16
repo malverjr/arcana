@@ -240,24 +240,30 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{ marginBottom: '0.25rem', letterSpacing: '0.02em', fontSize: '1rem' }}>
-        <strong>
-          {isAdmin ? 'Administrador' :
-           isArcanaPlus ? 'Usuario Arcana+' :
-           isArcana ? 'Usuario Arcana' :
-           'Usuario Libre'}
-        </strong>
-        {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
-      </p>
+<p style={{
+  marginBottom: '0.75rem',
+  letterSpacing: '0.02em',
+  fontSize: '1rem',
+  lineHeight: '1.6'
+}}>
+  <strong>
+    {isAdmin ? 'Administrador' :
+     isArcanaPlus ? 'Usuario Arcana+' :
+     isArcana ? 'Usuario Arcana' :
+     'Usuario Libre'}
+  </strong>
+  {' – Tiradas restantes: '}{isFinite(drawsLeft) ? drawsLeft : '∞'}
+</p>
 
-      <p style={{
-        marginBottom: '1rem',
-        letterSpacing: '0.02em',
-        fontSize: '0.9rem',
-        opacity: 0.8
-      }}>
-        Próxima tirada en: {timeLeft}
-      </p>
+<p style={{
+  marginBottom: '2rem',
+  letterSpacing: '0.02em',
+  fontSize: '0.9rem',
+  lineHeight: '1.6',
+  opacity: 0.8
+}}>
+  Próxima tirada en: {timeLeft}
+</p>
 
       <button
         onClick={e => {
