@@ -148,7 +148,7 @@ export default function Home() {
       background: '#000',
       color: '#fff',
       fontFamily: `"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-      padding: '5rem 1rem'
+      padding: '3rem 1rem 6rem 1rem'
     }}>
       <Head><title>Arcana</title></Head>
 
